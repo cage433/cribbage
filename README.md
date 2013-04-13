@@ -1,0 +1,4 @@
+cribbage
+========
+
+A cribbage engine
