@@ -2,6 +2,7 @@
 
 require 'find'
 
+
 def latest_source_timestamp
   source_times =[]
   Find.find(".") do |f|
@@ -12,28 +13,49 @@ def latest_source_timestamp
   source_times.sort.last
 end
 
-def message_tmux(msg)
-  `tmux #{msg}`
+def output_indicates_test_failure(output)
+  output.include?("FAILURE")
 end
 
-last_test_time = Time.now
+def output_indicates_compilation_failure(output)
+  output.chomp.split("\n").find{|line| line !~ /^testing/}
+end
 
-puts latest_source_timestamp
-while true
-  if last_test_time < latest_source_timestamp then
-    last_test_time = Time.now
-    message_tmux("display-message \"task launched\"")
-    message_tmux("set -g status-bg magenta")
-    sleep(2)
-    system("clear")
-    test_results = `raco test . 2>&1`
-    if test_results.include?("FAILURE") then
-      puts test_results
-      message_tmux("set -g status-bg red")
-    else
-      message_tmux("set -g status-bg green")
-    end
-    puts Time.now - last_test_time
+def tmux_message(msg, bg, fg)
+  `tmux set-option -g message-bg #{bg}`
+  `tmux set-option -g message-fg #{fg}`
+  `tmux display-message \"#{msg}\"`
+end
+
+def tmux_set_status_left(msg, bg, fg)
+  tmux_message(msg, bg, fg)
+  `tmux set-option -gq -t vim status-left \"\#[bg=#{bg},fg=#{fg}]#{msg}\"`
+end
+
+def build
+  system("clear")
+  tmux_message("Building", "black", "white")
+  output = `raco test . 2>&1`
+  if output_indicates_test_failure(output) then
+    tmux_set_status_left("Tests failed ", "red", "black")
+    puts output
+  elsif output_indicates_compilation_failure(output)
+    puts output
+    tmux_set_status_left("Compilation failed ", "yellow", "black")
+  else
+    test_duration=format("%0.2f(s)", Time.now - $last_test_time)
+    tmux_set_status_left("Passed #{test_duration}", "green", "black")
   end
-  sleep(0.01)
+end
+
+$last_test_time = Time.now
+`tmux set -gq display-time 1250`
+`tmux set-option -gq status-left-length 20`
+
+while true
+  if $last_test_time < latest_source_timestamp then
+    $last_test_time = Time.now
+    build
+  end
+  sleep(0.05)
 end
