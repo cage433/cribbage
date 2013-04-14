@@ -31,12 +31,24 @@
 (defun shuffled-deck() 
   (shuffle (copy-seq *CARDS*)))
 
+(defun flush-value (cards)
+  (let ((counts (make-hash-table :test #'eql)))
+    (mapcar (lambda (card)
+              (incf (gethash (card-suit card) counts 0)))
+            cards)
+    (let ((cs nil))
+      (maphash (lambda (suit count) (setf cs (cons count cs))) 
+               counts)
+      (let ((longest-suit (apply #'max cs)))
+      (if (>= longest-suit 4)
+        longest-suit
+        0)))))
 
 (defun hand-value (starter hand)
   (let ((value 0)
         (hand-suits (remove-duplicates (mapcar #'card-suit hand)))
         (starter-suit (card-suit starter)))
-    (if ( = (length hand-suits) 1)
+    (if (= (length hand-suits) 1)
       (progn
         (incf value 4)
         (if (eq starter-suit (car hand-suits))
@@ -47,12 +59,15 @@
 (defun card-from-name (name)
   (let ((r (position (subseq name 0 (1- (length name))) *RANKS* :test #'string-equal))
         (s (position (subseq name (1- (length name))) *SUITS* :test #'string-equal)))
-    (or (and r s 
-          (make-card :rank (nth r *RANKS*)
-                    :rank-index r
-                    :rank-value (nth r *RANK-VALUES*)
-                    :suit (nth s *SUITS*)))
+    (if (and r s)
+        (make-card :rank (nth r *RANKS*)
+                  :rank-index r
+                  :rank-value (nth r *RANK-VALUES*)
+                  :suit (nth s *SUITS*))
         (error (format nil "Can't make a card from ~A" name)))))
+
+(defun hand-from-names (names)
+  (mapcar #'card-from-name names))
 
     
 (deftest test-cards()
@@ -62,6 +77,10 @@
   (check (= 10 (card-rank-value (card-from-name "QH"))))
   (check (= 1 (card-rank-value (card-from-name "AH"))))
   (check (= 5 (card-rank-value (card-from-name "5D"))))
+  (check (= 4 (flush-value (hand-from-names '("2H" "4H" "6H" "QH")))))
+  (check (= 5 (flush-value (hand-from-names '("2H" "4H" "6H" "QH" "AH" "2C")))))
+  (check (= 0 (flush-value (hand-from-names '("2D" "4S" "6H" "QH" "AH" "2C")))))
+
   )
 
 
