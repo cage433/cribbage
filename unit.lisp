@@ -1,3 +1,4 @@
+(load "utils")
 (defvar *test-name* nil)
 
 
@@ -24,12 +25,7 @@
 							  (* tolerance (max (abs value) (abs expected-value)))
 							  :text text :double-format double-format))
 
-(defmacro with-gensyms (syms &body body)
-  "From Paul Graham's 'On Lisp'"
-  `(let ,(mapcar #'(lambda (s)
-                     `(,s (gensym)))
-                 syms)
-     ,@body))
+
 (defmacro combine-results (&body forms)
   "Combine the results (as booleans) of evaluating `forms' in order."
   (with-gensyms (result)
@@ -46,3 +42,5 @@
   "Run each expression in `forms' as a test case."
   `(combine-results
     ,@(loop for f in forms collect `(report-result ,f ',f))))
+
+

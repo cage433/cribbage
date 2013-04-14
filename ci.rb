@@ -37,9 +37,9 @@ def tmux_clear_status_left
 end
 
 def run_tests
-  result = `sbcl --noinform --disable-debugger --load main --eval '(run-tests :exit-on-termination t)' 2>&1`
+  result = `sbcl --noinform --disable-debugger --load test --eval '(run-tests :exit-on-termination t)' 2>&1`
   success = $?.success?
-  puts result unless success
+  puts result #unless success
   [result, success]
 end
 
