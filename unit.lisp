@@ -38,6 +38,7 @@
 ;; 	  (format t "... passed: ~a~%" *test-name*)
 	  (format t "... failed: ~a ~a~%" *test-name* form))
   result)
+
 (defmacro check (&body forms)
   "Run each expression in `forms' as a test case."
   `(combine-results

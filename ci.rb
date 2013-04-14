@@ -40,6 +40,7 @@ def run_tests
   result = `sbcl --noinform --disable-debugger --load test --eval '(run-tests :exit-on-termination t)' 2>&1`
   success = $?.success?
   puts result #unless success
+  puts "Successful? #{success}"
   [result, success]
 end
 
