@@ -6,8 +6,8 @@
 
 (defparameter *SUITS* (list "H" "C" "D" "S"))
 (defparameter *RANK-INDEXES* (list 0 1 2 3 4 5 6 7 8 9 10 11 12))
-(defparameter *RANK-VALUES* (list 2 3 4 5 6 7 8 9 10 10 10 10 1))
-(defparameter *RANKS* (list "2" "3" "4" "5" "6" "7" "8" "9" "10" "J" "Q" "K" "A"))
+(defparameter *RANK-VALUES* (list 1 2 3 4 5 6 7 8 9 10 10 10 10))
+(defparameter *RANKS* (list "A" "2" "3" "4" "5" "6" "7" "8" "9" "10" "J" "Q" "K" "A"))
 
 (defparameter *CARDS*
   (make-array 52
@@ -64,10 +64,25 @@
           rank-counts)
     value))
 
+(defun run-value (cards)
+  (let* ((by-indices (group-by #'card-rank-index cards))
+         (contiguous-groups (remove-if-not (lambda (g) (>= (length g) 3))
+                                       (cl-utilities:split-sequence-if (lambda (i) (null (gethash i by-indices))) *RANK-INDEXES* :remove-empty-subseqs t)))
+         (value 0))
+    (mapc (lambda (group) 
+            (incf value (apply #'* (length group) (mapcar (lambda (i) (length (gethash i by-indices))) group))))
+          contiguous-groups)
+    value))
+
+    
+
+
 
 (defun hand-value (cards)
   (+
     (flush-value cards)
+    (pairs-and-higher-value cards)
+    (run-value cards)
     ))
 
 
@@ -99,6 +114,19 @@
     (= 4 (flush-value (hand-from-string "2H 4H 6H QH")))
     (= 5 (flush-value (hand-from-string "2H 4H 6H QH AH 2C")))
     (= 0 (flush-value (hand-from-string "2D 4S 6H QH AH 2C")))
+    (= 0 (pairs-and-higher-value (hand-from-string "2D 3C 4S 8C 10H QH")))
+    (= 2 (pairs-and-higher-value (hand-from-string "2D 2C 3S 4C 10H QH")))
+    (= 6 (pairs-and-higher-value (hand-from-string "2D 2C 2S 4C 10H QH")))
+    (= 4 (pairs-and-higher-value (hand-from-string "2D 2C AS AC 10H QH")))
+    (= 12 (pairs-and-higher-value (hand-from-string "2D 2C 2S 2H 10H QH")))
+    (= 0 (run-value (hand-from-string "2D 3C 5S 7C 8C 10D")))
+    (= 3 (run-value (hand-from-string "2D 3C 4S")))
+    (= 3 (run-value (hand-from-string "2D 3C 4S 6C 7D 9D")))
+    (= 6 (run-value (hand-from-string "2D 3C 4S 6C 7D 8D")))
+    (= 4 (run-value (hand-from-string "2D 3C 4S 5C 7D 8D")))
+    (= 5 (run-value (hand-from-string "2D 3C 4S 5C 6D 8D")))
+    (= 12 (run-value (hand-from-string "2C 2D 3C 4S 4C 8D")))
+    (= 16 (run-value (hand-from-string "2C 2D 3C 4S 4C 5D")))
   ))
 
 

@@ -9,8 +9,7 @@
               (> src-time fasl-time))
         (progn
           (format *standard-output* "Compiling ~A~%" name)
-          (compile-file name))
-        (format *standard-output* "No need to compile ~A~%" name))
+          (compile-file name)))
       (load (file-name ".fasl") :verbose t))))
 
 (load-and-compile-if-necessary "cl-utilities/package")
