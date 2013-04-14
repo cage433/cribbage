@@ -31,29 +31,34 @@
 (defun shuffled-deck() 
   (shuffle (copy-seq *CARDS*)))
 
+
+(defun group-by (fn xs) 
+  (let ((groups (make-hash-table :test #'eql)))
+    (mapc 
+      (lambda (x) 
+        (let* ((y (funcall fn x))
+               (grp (gethash y groups nil)))
+            (setf (gethash y groups) (cons y grp))))
+      xs)
+    groups))
+
+(defun hash-values (hash)
+  (let ((vs nil))
+    (maphash (lambda (k v) (declare (ignore k)) (setf vs (cons v vs))) hash)
+    vs))
+
 (defun flush-value (cards)
-  (let ((counts (make-hash-table :test #'eql)))
-    (mapcar (lambda (card)
-              (incf (gethash (card-suit card) counts 0)))
-            cards)
-    (let ((cs nil))
-      (maphash (lambda (suit count) (setf cs (cons count cs))) 
-               counts)
-      (let ((longest-suit (apply #'max cs)))
+  (let* ((suit-lengths (mapcar #'length (hash-values (group-by #'card-suit cards))))
+         (longest-suit (apply #'max suit-lengths)))
       (if (>= longest-suit 4)
         longest-suit
-        0)))))
+        0)))
 
-(defun hand-value (starter hand)
-  (let ((value 0)
-        (hand-suits (remove-duplicates (mapcar #'card-suit hand)))
-        (starter-suit (card-suit starter)))
-    (if (= (length hand-suits) 1)
-      (progn
-        (incf value 4)
-        (if (eq starter-suit (car hand-suits))
-          (incf value))))
-    value))
+
+(defun hand-value (cards)
+  (+
+    (flush-value cards)
+    ))
 
 
 (defun card-from-name (name)
