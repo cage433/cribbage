@@ -6,7 +6,7 @@ require 'find'
 def latest_source_timestamp
   source_times =[]
   Find.find(".") do |f|
-    if f.end_with?(".rkt") then
+    if f.end_with?(".lisp") then
       source_times.push File.mtime(f)
     end
   end
@@ -14,7 +14,7 @@ def latest_source_timestamp
 end
 
 def output_indicates_test_failure(output)
-  output.include?("FAILURE")
+  output.include?("failed")
 end
 
 def output_indicates_compilation_failure(output)
@@ -36,21 +36,26 @@ def tmux_clear_status_left
   `tmux set-option -gq -t vim status-left \"\"`
 end
 
+def run_tests
+  result = `sbcl --noinform --disable-debugger --load main --eval '(run-tests :exit-on-termination t)' 2>&1`
+  success = $?.success?
+  puts result unless success
+  [result, success]
+end
+
 
 def build
   system("clear")
   tmux_message("Building", "black", "white")
   tmux_clear_status_left
-  output = `raco test . 2>&1`
-  if output_indicates_test_failure(output) then
-    tmux_set_status_left("Tests failed ", "red", "black")
-    puts output
-  elsif output_indicates_compilation_failure(output)
-    puts output
-    tmux_set_status_left("Compilation failed ", "yellow", "black")
-  else
+  output, success = run_tests
+  if success then
     test_duration=format("%0.2f(s)", Time.now - $last_test_time)
     tmux_message("Passed #{test_duration}", "green", "black")
+  elsif output_indicates_test_failure(output) then
+    tmux_set_status_left("Tests failed ", "red", "black")
+  else
+    tmux_set_status_left("Compilation failed ", "yellow", "black")
   end
 end
 
