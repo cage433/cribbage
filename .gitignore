@@ -1,1 +1,6 @@
 *.fasl
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+tags
