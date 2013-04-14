@@ -47,10 +47,13 @@
     (maphash (lambda (k v) (declare (ignore k)) (setf vs (cons v vs))) hash)
     vs))
 
-(defun flush-value (cards)
+(defun flush-value (cards hand-or-crib)
   (let* ((suit-counts (mapcar #'length (hash-values (group-by #'card-suit cards))))
-         (longest-suit (apply #'max suit-counts)))
-      (if (>= longest-suit 4)
+         (longest-suit (apply #'max suit-counts))
+         (minimal-flush-size (ecase hand-or-crib
+                                (:hand 4)
+                                (:crib 5))))
+      (if (>= longest-suit minimal-flush-size)
         longest-suit
         0)))
 
@@ -86,17 +89,18 @@
                       (t 0))))
       (* value-per-fifteen 
          (ways-to-make 15 ranks)))))
-    
 
+;(defun jack-value (starter hand)
 
-
-(defun hand-value (cards)
-  (+
-    (flush-value cards)
-    (pairs-and-higher-value cards)
-    (run-value cards)
-    (fifteens-value cards)
-    ))
+(defun hand-value (starter hand hand-or-crib)
+  (let ((cards (cons starter hand)))
+    (+
+      (flush-value cards hand-or-crib)
+      (pairs-and-higher-value cards)
+      (run-value cards)
+      (fifteens-value cards)
+      (jack-value starter hand hand-or-crib)
+      )))
 
 
 (defun card-from-name (name)
@@ -124,9 +128,11 @@
     (= 10 (card-rank-value (card-from-name "QH")))
     (= 1 (card-rank-value (card-from-name "AH")))
     (= 5 (card-rank-value (card-from-name "5D")))
-    (= 4 (flush-value (hand-from-string "2H 4H 6H QH")))
-    (= 5 (flush-value (hand-from-string "2H 4H 6H QH AH 2C")))
-    (= 0 (flush-value (hand-from-string "2D 4S 6H QH AH 2C")))
+    (= 4 (flush-value (hand-from-string "2H 4H 6H QH") :hand))
+    (= 0 (flush-value (hand-from-string "2H 4H 6H QH KD") :crib))
+    (= 5 (flush-value (hand-from-string "2H 4H 6H QH AH 2C") :hand))
+    (= 5 (flush-value (hand-from-string "2H 4H 6H QH AH 2C") :crib))
+    (= 0 (flush-value (hand-from-string "2D 4S 6H QH AH 2C") :hand))
     (= 0 (pairs-and-higher-value (hand-from-string "2D 3C 4S 8C 10H QH")))
     (= 2 (pairs-and-higher-value (hand-from-string "2D 2C 3S 4C 10H QH")))
     (= 6 (pairs-and-higher-value (hand-from-string "2D 2C 2S 4C 10H QH")))
