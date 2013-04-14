@@ -32,9 +32,15 @@ def tmux_set_status_left(msg, bg, fg)
   `tmux set-option -gq -t vim status-left \"\#[bg=#{bg},fg=#{fg}]#{msg}\"`
 end
 
+def tmux_clear_status_left
+  `tmux set-option -gq -t vim status-left \"\"`
+end
+
+
 def build
   system("clear")
   tmux_message("Building", "black", "white")
+  tmux_clear_status_left
   output = `raco test . 2>&1`
   if output_indicates_test_failure(output) then
     tmux_set_status_left("Tests failed ", "red", "black")
@@ -44,7 +50,7 @@ def build
     tmux_set_status_left("Compilation failed ", "yellow", "black")
   else
     test_duration=format("%0.2f(s)", Time.now - $last_test_time)
-    tmux_set_status_left("Passed #{test_duration}", "green", "black")
+    tmux_message("Passed #{test_duration}", "green", "black")
   end
 end
 
