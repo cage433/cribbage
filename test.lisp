@@ -8,9 +8,9 @@
       (if (or (null fasl-time) 
               (> src-time fasl-time))
         (progn
-          (format *standard-output* "Compiling ~a~%" name)
+          (format *standard-output* "Compiling ~A~%" name)
           (compile-file name))
-        (format *standard-output* "No need to compile ~a~%" name))
+        (format *standard-output* "No need to compile ~A~%" name))
       (load name))))
 
 (load-and-compile-if-necessary "utils")
