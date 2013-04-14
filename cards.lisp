@@ -74,6 +74,18 @@
           contiguous-groups)
     value))
 
+(defun fifteens-value (cards)
+  (let ((ranks (sort (mapcar #'card-rank-value cards)
+                     #'<))
+        (value-per-fifteen 2))
+    (labels ((ways-to-make (n ns)
+                (cond ((null ns) 0)
+                      ((= (car ns) n) (+ 1 (ways-to-make n (cdr ns))))
+                      ((< (car ns) n) (+ (ways-to-make (- n (car ns)) (cdr ns))
+                                        (ways-to-make n (cdr ns))))
+                      (t 0))))
+      (* value-per-fifteen 
+         (ways-to-make 15 ranks)))))
     
 
 
@@ -83,6 +95,7 @@
     (flush-value cards)
     (pairs-and-higher-value cards)
     (run-value cards)
+    (fifteens-value cards)
     ))
 
 
@@ -127,6 +140,12 @@
     (= 5 (run-value (hand-from-string "2D 3C 4S 5C 6D 8D")))
     (= 12 (run-value (hand-from-string "2C 2D 3C 4S 4C 8D")))
     (= 16 (run-value (hand-from-string "2C 2D 3C 4S 4C 5D")))
+    (= 0 (fifteens-value (hand-from-string "")))
+    (= 0 (fifteens-value (hand-from-string "2D 4C 4S 8C 10H QH")))
+    (= 2 (fifteens-value (hand-from-string "10C 5D")))
+    (= 2 (fifteens-value (hand-from-string "10C 5D 6H 8D 3S 3C")))
+    (= 6 (fifteens-value (hand-from-string "10C 5D 6H 9D 3S 3C")))
+    (= 16 (fifteens-value (hand-from-string "4C 4D 5S 5D 6H 6D")))
   ))
 
 
