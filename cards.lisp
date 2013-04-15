@@ -49,7 +49,7 @@
 
 (defun flush-value (cards hand-or-crib)
   (let* ((suit-counts (mapcar #'length (hash-values (group-by #'card-suit cards))))
-         (longest-suit (apply #'max suit-counts))
+         (longest-suit (if suit-counts (apply #'max suit-counts) 0))
          (minimal-flush-size (ecase hand-or-crib
                                 (:hand 4)
                                 (:crib 5))))
@@ -90,7 +90,14 @@
       (* value-per-fifteen 
          (ways-to-make 15 ranks)))))
 
-;(defun jack-value (starter hand)
+(defun jack-value (starter hand)
+  (if (find (card-suit starter) 
+            (mapcar #'card-suit
+                    (remove-if-not (lambda (card) (string-equal (card-rank card) "J")) hand))
+            :test #'string-equal)
+    1
+    0))
+
 
 (defun hand-value (starter hand hand-or-crib)
   (let ((cards (cons starter hand)))
@@ -99,7 +106,7 @@
       (pairs-and-higher-value cards)
       (run-value cards)
       (fifteens-value cards)
-      (jack-value starter hand hand-or-crib)
+      (jack-value starter hand)
       )))
 
 
@@ -128,16 +135,19 @@
     (= 10 (card-rank-value (card-from-name "QH")))
     (= 1 (card-rank-value (card-from-name "AH")))
     (= 5 (card-rank-value (card-from-name "5D")))
+    (= 0 (flush-value (hand-from-string "") :crib))
     (= 4 (flush-value (hand-from-string "2H 4H 6H QH") :hand))
     (= 0 (flush-value (hand-from-string "2H 4H 6H QH KD") :crib))
     (= 5 (flush-value (hand-from-string "2H 4H 6H QH AH 2C") :hand))
     (= 5 (flush-value (hand-from-string "2H 4H 6H QH AH 2C") :crib))
     (= 0 (flush-value (hand-from-string "2D 4S 6H QH AH 2C") :hand))
+    (= 0 (pairs-and-higher-value (hand-from-string "")))
     (= 0 (pairs-and-higher-value (hand-from-string "2D 3C 4S 8C 10H QH")))
     (= 2 (pairs-and-higher-value (hand-from-string "2D 2C 3S 4C 10H QH")))
     (= 6 (pairs-and-higher-value (hand-from-string "2D 2C 2S 4C 10H QH")))
     (= 4 (pairs-and-higher-value (hand-from-string "2D 2C AS AC 10H QH")))
     (= 12 (pairs-and-higher-value (hand-from-string "2D 2C 2S 2H 10H QH")))
+    (= 0 (run-value (hand-from-string "")))
     (= 0 (run-value (hand-from-string "2D 3C 5S 7C 8C 10D")))
     (= 3 (run-value (hand-from-string "2D 3C 4S")))
     (= 3 (run-value (hand-from-string "2D 3C 4S 6C 7D 9D")))
@@ -152,6 +162,12 @@
     (= 2 (fifteens-value (hand-from-string "10C 5D 6H 8D 3S 3C")))
     (= 6 (fifteens-value (hand-from-string "10C 5D 6H 9D 3S 3C")))
     (= 16 (fifteens-value (hand-from-string "4C 4D 5S 5D 6H 6D")))
+    (= 0 (jack-value (card-from-name "JD") (hand-from-string "")))
+    (= 1 (jack-value (card-from-name "2H") (hand-from-string "4C 4D 5S 5D 6H JH")))
+    (= 1 (jack-value (card-from-name "JD") (hand-from-string "4C 4D 5S 5D JD JH")))
+    (= 0 (jack-value (card-from-name "2D") (hand-from-string "4C 4D 5S 5D 6H JH")))
+    (= 0 (jack-value (card-from-name "2D") (hand-from-string "4C 4D 5S 5D 6H 10H")))
+    (= 0 (jack-value (card-from-name "JD") (hand-from-string "4C 4D 5S 5D 6H 10H")))
   ))
 
 
