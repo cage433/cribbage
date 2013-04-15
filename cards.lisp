@@ -168,6 +168,12 @@
     (= 0 (jack-value (card-from-name "2D") (hand-from-string "4C 4D 5S 5D 6H JH")))
     (= 0 (jack-value (card-from-name "2D") (hand-from-string "4C 4D 5S 5D 6H 10H")))
     (= 0 (jack-value (card-from-name "JD") (hand-from-string "4C 4D 5S 5D 6H 10H")))
+    (= 16 (hand-value (card-from-name "5D") (hand-from-string "6C 10D 5H 4S") :crib))
+    (= 13 (hand-value (card-from-name "AD") (hand-from-string "JD 3S 3C 2S") :crib))
+    (= 6 (hand-value (card-from-name "AD") (hand-from-string "3H 3S 4S 4D") :crib))
+    (= 29 (hand-value (card-from-name "5C") (hand-from-string "JC 5S 5D 5H") :crib))
+    (= 16 (hand-value (card-from-name "6D") (hand-from-string "3C 3D 3H 9S") :crib))
+    (= 17 (hand-value (card-from-name "4H") (hand-from-string "2D 3C 4S 4C") :crib))
   ))
 
 
