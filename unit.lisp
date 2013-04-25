@@ -1,4 +1,5 @@
 (load "utils")
+
 (defvar *test-name* nil)
 
 
@@ -32,6 +33,7 @@
 	`(let ((,result t))
 	  ,@(loop for f in forms collect `(unless ,f (setf ,result nil)))
 	  ,result)))
+
 (defun report-result (result form)
   "Report the results of a single test case. Called by `check'."
   (unless result
@@ -45,3 +47,18 @@
     ,@(loop for f in forms collect `(report-result ,f ',f))))
 
 
+(defmacro === (a b &key (test eql))
+  (with-gensyms (x y)
+                 `(let ((,x ,a)
+                       (,y ,b))
+                   (if (,test ,x ,y)
+                     t
+                     (progn
+                       (format t "Expected ~A but got ~A~%" ,x ,y)
+                       nil)))))
+
+
+(defun forall (fn args)
+  (if (null args)
+    t
+    (and (funcall fn (car args)) (forall fn (cdr args)))))

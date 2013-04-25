@@ -17,10 +17,12 @@
 (load-and-compile-if-necessary "utils")
 (load-and-compile-if-necessary "unit")
 (load-and-compile-if-necessary "cards")
+(load-and-compile-if-necessary "game")
 
 (defun run-tests (&key (exit-on-termination t))
   (let ((result 
-          (combine-results (test-cards))))
+          (combine-results (test-cards) 
+                           (test-game))))
     (if exit-on-termination
       (sb-ext:exit :code (if result 0 1))
       result)))

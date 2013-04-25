@@ -211,6 +211,6 @@ $map = {"declaration" => "d_declar.htm", "dynamic-extent" => "d_dynami.htm", "ft
 symbol=ARGV[0]
 page = $map[symbol]
 url= "http://www.lispworks.com/documentation/HyperSpec/Body/#{page}"
-exec("lynx #{url}")
+exec("lynx -vikeys #{url}")
 
 

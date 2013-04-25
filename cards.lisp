@@ -22,14 +22,15 @@
                             ))
                     *SUITS*)))
 
-(defun shuffle (vec)
+
+(defun shuffle (vec &optional (random-state (make-random-state t)))
   (dotimes (i (length vec))
-    (let ((j (+ i (random (- (length vec) i)))))
+    (let ((j (+ i (random (- (length vec) i) random-state))))
       (rotatef (aref vec i) (aref vec j))))
   vec)
 
-(defun shuffled-deck() 
-  (shuffle (copy-seq *CARDS*)))
+(defun shuffled-deck (&optional (random-state (make-random-state t))) 
+  (shuffle (copy-seq *CARDS*) random-state))
 
 
 (defun group-by (fn xs) 
