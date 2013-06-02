@@ -9,3 +9,5 @@
                  syms)
      ,@body))
 
+(defmacro dbind (&body body)
+  `(destructuring-bind ,@body))

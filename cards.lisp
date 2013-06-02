@@ -3,7 +3,6 @@
 (defstruct card
   rank rank-index rank-value suit)
 
-
 (defparameter *SUITS* (list "H" "C" "D" "S"))
 (defparameter *RANK-INDEXES* (list 0 1 2 3 4 5 6 7 8 9 10 11 12))
 (defparameter *RANK-VALUES* (list 1 2 3 4 5 6 7 8 9 10 10 10 10))
@@ -30,7 +29,7 @@
   vec)
 
 (defun shuffled-deck (&optional (random-state (make-random-state t))) 
-  (shuffle (copy-seq *CARDS*) random-state))
+  (coerce (shuffle (copy-seq *CARDS*) random-state) 'list))
 
 
 (defun group-by (fn xs) 

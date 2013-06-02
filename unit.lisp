@@ -46,16 +46,12 @@
   `(combine-results
     ,@(loop for f in forms collect `(report-result ,f ',f))))
 
-
-(defmacro === (a b &key (test eql))
-  (with-gensyms (x y)
-                 `(let ((,x ,a)
-                       (,y ,b))
-                   (if (,test ,x ,y)
-                     t
-                     (progn
-                       (format t "Expected ~A but got ~A~%" ,x ,y)
-                       nil)))))
+(defun === (a b &key (test #'eql))
+  (if (funcall test a b)
+    t
+    (progn
+      (format t "Expected ~A but got ~A~%" a b)
+      nil)))
 
 
 (defun forall (fn args)

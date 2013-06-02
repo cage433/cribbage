@@ -69,5 +69,5 @@ while true
     $last_test_time = Time.now
     build
   end
-  sleep(0.05)
+  sleep(0.3)
 end
