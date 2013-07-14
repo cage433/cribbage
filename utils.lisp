@@ -9,5 +9,10 @@
                  syms)
      ,@body))
 
+(defmacro while (expr &body body)
+  (with-gensyms (x)
+        `(do ((,x ,expr ,expr))
+                ((not ,x))
+             ,@body)))
 (defmacro dbind (&body body)
   `(destructuring-bind ,@body))

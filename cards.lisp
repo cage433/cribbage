@@ -109,6 +109,17 @@
       (jack-value starter hand)
       )))
 
+(defun play-fifteen-value (cards)
+  (if (= 15 (apply #'+ (mapcar #'card-rank-value cards)))
+    2
+    0))
+
+(defun play-value (cards)
+  (+
+    (play-fifteen-value cards)
+    (play-pairs-and-higher-value cards)
+    (play-run-value cards)
+    (play-thierty-one-value cards)))
 
 (defun card-from-name (name)
   (let ((r (position (subseq name 0 (1- (length name))) *RANKS* :test #'string-equal))
@@ -129,6 +140,11 @@
     
 (deftest test-cards()
   (check 
+    (=== 2 (play-fifteen-value (hand-from-string "10C 5H")))
+    (=== 2 (play-fifteen-value (hand-from-string "10C 3H 2H")))
+    (=== 0 (play-fifteen-value (hand-from-string "")))
+    (=== 0 (play-fifteen-value (hand-from-string "8D")))
+    (=== 0 (play-fifteen-value (hand-from-string "8D JC")))
     (= 52 (length *CARDS*))
     (= 52 (length (remove-duplicates (shuffled-deck))))
     (= 10 (card-rank-value (card-from-name "10H")))

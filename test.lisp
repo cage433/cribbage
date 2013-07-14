@@ -9,7 +9,7 @@
               (> src-time fasl-time))
         (progn
           (format *standard-output* "Compiling ~A~%" name)
-          (compile-file name)))
+          (compile-file name :verbose nil :print nil)))
       (load (file-name ".fasl") :verbose t))))
 
 (load-and-compile-if-necessary "cl-utilities/package")
@@ -23,6 +23,7 @@
   (let ((result 
           (combine-results (test-cards) 
                            (test-game)
+                           (test-game2)
                            )))
     (if exit-on-termination
       (sb-ext:exit :code (if result 0 1))
