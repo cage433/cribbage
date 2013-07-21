@@ -1,17 +1,3 @@
-(defun load-and-compile-if-necessary (name)
-  (labels ((file-name (ext) (concatenate 'string name ext))
-           (file-date (ext) 
-              (and (probe-file (file-name ext))
-                  (file-write-date (file-name ext)))))
-    (let ((src-time (file-date ".lisp"))
-          (fasl-time (file-date ".fasl")))
-      (if (or (null fasl-time) 
-              (> src-time fasl-time))
-        (progn
-          (format *standard-output* "Compiling ~A~%" name)
-          (compile-file name :verbose nil :print nil)))
-      (load (file-name ".fasl") :verbose t))))
-
 (let ((*default-pathname-defaults* (merge-pathnames #p"lisp-utils/" *default-pathname-defaults*)))
   (load "load"))
 
