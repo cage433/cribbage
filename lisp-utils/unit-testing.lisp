@@ -16,8 +16,8 @@
      (let ((result (let ((*test-name* (append *test-name* (list ',name))))
 		      ,@body)))
        (if result
-	   (format t "Passed ~%")
-	   (format t "Failed ~%"))
+        (format t ".")
+        (format t "~%Failed ~%"))
        result)))
 
 (defmacro check (&body forms)
@@ -34,6 +34,7 @@
 
 (defun report-result (result form)
   "Report the results of a single test case. Called by 'check'."
+  #(format t "~a ~a~%" *test-name* form)
   (if (not result)
       (format t "~:[FAIL~;pass~] ... ~a: ~a~%" result *test-name* form))
   result)

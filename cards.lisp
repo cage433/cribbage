@@ -114,12 +114,24 @@
     2
     0))
 
+(defun play-pairs-and-higher-value (cards)
+  (declare (ignorable cards))
+  0)
+
+(defun play-run-value (cards)
+  (declare (ignorable cards))
+  0)
+
+(defun play-thirty-one-value (cards)
+  (declare (ignorable cards))
+  0)
+
 (defun play-value (cards)
   (+
     (play-fifteen-value cards)
     (play-pairs-and-higher-value cards)
     (play-run-value cards)
-    (play-thierty-one-value cards)))
+    (play-thirty-one-value cards)))
 
 (defun card-to-short-string (card)
   (format nil "~a~a" (card-rank card) (card-suit card)))

@@ -1,4 +1,4 @@
-(load "package")
+(load "package.lisp")
 
 (in-package :cage433-lisp-utils)
 
@@ -17,7 +17,7 @@
         (progn
           (format *standard-output* "Compiling ~A~%" name)
           (compile-file name :verbose nil :print nil)))
-      (load (file-name ".fasl") :verbose t))))
+      (load (file-name ".fasl") :verbose nil))))
 
 
 (load-and-compile-if-necessary "package")
@@ -27,7 +27,7 @@
 (load-and-compile-if-necessary "readers")
 (load-and-compile-if-necessary "readers-tests")
 
-(defun run-lisp-utilities-tests (&key (exit-on-termination t))
+(defun run-tests (&key (exit-on-termination t))
   (let ((result 
           (combine-results 
             (test-span)

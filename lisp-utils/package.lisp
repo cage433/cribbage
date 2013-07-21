@@ -5,11 +5,8 @@
   (:export :deftest
            :load-and-compile-if-necessary
            :combine-results
-           :run-lisp-utilities-tests
            :===
            :dbind
            :check
            :with-gensyms
-
-           )
-  )
+           ))

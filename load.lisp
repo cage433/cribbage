@@ -16,19 +16,13 @@
 (load-and-compile-if-necessary "cards")
 (load-and-compile-if-necessary "game")
 
-(defun run-cribbage-tests(&key (exit-on-termination t))
+(defun run-tests(&key (exit-on-termination t))
   (let ((result 
           (combine-results (test-cards) 
                            (test-game)
                            (test-game2)
-                           (run-lisp-utilities-tests :exit-on-termination nil)
+                           (cage433-lisp-utils::run-tests :exit-on-termination nil)
                            )))
     (if exit-on-termination
       (sb-ext:exit :code (if result 0 1))
       result)))
-
-
-(in-package :common-lisp-user)
-
-(defun run-tests (&key (exit-on-termination t))
-  (cage433-cribbage::run-cribbage-tests :exit-on-termination exit-on-termination))
