@@ -1,0 +1,6 @@
+(proclaim '(optimize (debug 3)))
+(load "utils0")
+(load "unit-testing")
+(load "utils")
+(load "readers")
+(load "unit-testing2")
