@@ -1,3 +1,4 @@
+(in-package :cage433-lisp-utils)
 
 (deftest test-anon-functions()
 	(check (= 9 (#_(* _ _) 3)))

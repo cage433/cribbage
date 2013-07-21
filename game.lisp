@@ -1,3 +1,5 @@
+(in-package :cage433-cribbage)
+
 (defstruct game-state
   dealer
   pone
@@ -10,6 +12,7 @@
 (defmacro with-game (game-state &body body)
   `(with-slots (dealer pone crib starter play-cards discards next-to-play) ,game-state
      (labels ((current-play-points() (apply #'+ (mapcar #'card-rank-value play-cards))))
+      (declare (ignorable #'current-play-points))
       (with-slots ((dealer-cards cards) (dealer-crib crib) (dealer-discarder discarder) (dealer-name name)) dealer
         (with-slots ((pone-cards cards) (pone-crib crib) (pone-discarder discarder) (pone-name name)) pone
       ,@body)))))
@@ -24,10 +27,12 @@
 
 (defmacro with-player (player &body body)
   `(with-slots (name discarder choose-play-card cards points) ,player
-     (labels ((playable-cards() (remove-if-not (lambda (card) (> (card-rank-value card) (- 31 (current-play-points)))))))
+     (labels ((playable-cards() (remove-if-not (lambda (card) (> (card-rank-value card) (- 31 (current-play-points)))) cards)))
+      (declare (ignorable #'playable-cards))
     ,@body)))
 
 (defun print-full-game-state (game-state &key (point-of-view nil))
+  (declare (ignorable point-of-view))
   (with-game game-state
     (clear-screen)
     (format t "Dealer ~a~%Pone ~a~%" dealer-name pone-name)
@@ -55,6 +60,9 @@
   (declare (ignorable game-state))
   (assert cards () "Can't choose from empty hand")
   (list (car cards) (cdr cards)))
+
+(defun read-numbers()
+  nil)
 
 (defun human-choose-discard (cards dealer-or-pone)
   (declare (ignorable cards dealer-or-pone))
@@ -144,19 +152,13 @@
 
 (defun play-round (game-state random-state)
   (deal-cards game-state random-state)
-  (format t "Dealing~%")
-  (print-full-game-state game-state)
   (discard game-state)
-  (print-full-game-state game-state)
-  (format t "Play~%")
   (while (have-cards game-state)
          (do-play game-state))
-  (format t "Show~%")
   (show-pone game-state)
   (show-dealer game-state)
   )
 
-(format t "Making test-game~%")
 (deftest test-game()
   (let ((game-state (make-game-state 
                :dealer (minimal-player "fred")
@@ -194,3 +196,4 @@
     (combine-results
       (progn (play-round game-state (make-random-state t)) t)
       (check (=== 8 (length discards)))))))
+

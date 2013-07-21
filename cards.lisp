@@ -1,3 +1,5 @@
+(in-package :cage433-cribbage)
+
 (defstruct card
   rank rank-index rank-value suit)
 

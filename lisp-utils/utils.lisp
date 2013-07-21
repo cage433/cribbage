@@ -1,3 +1,5 @@
+(in-package :cage433-lisp-utils)
+
 (defun foldr (fn init args)
 	(reduce fn args :initial-value init :from-end t))
 (defun foldl (fn init args)

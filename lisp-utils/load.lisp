@@ -1,3 +1,8 @@
+(load "package")
+
+(in-package :cage433-lisp-utils)
+
+
 (proclaim '(optimize (debug 3)))
 
 (defun load-and-compile-if-necessary (name)
@@ -14,6 +19,8 @@
           (compile-file name :verbose nil :print nil)))
       (load (file-name ".fasl") :verbose t))))
 
+
+(load-and-compile-if-necessary "package")
 (load-and-compile-if-necessary "utils0")
 (load-and-compile-if-necessary "unit-testing")
 (load-and-compile-if-necessary "utils")
@@ -32,5 +39,3 @@
       (sb-ext:exit :code (if result 0 1))
       result)))
 
-(defun run-tests (&key (exit-on-termination t))
-  (run-lisp-utilities-tests :exit-on-termination exit-on-termination))

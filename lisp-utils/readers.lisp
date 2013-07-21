@@ -1,3 +1,5 @@
+(in-package :cage433-lisp-utils)
+
 (defun mkstr (&rest args)
 	"Concatenates a list of arguments into a string"
 	(with-output-to-string (s)

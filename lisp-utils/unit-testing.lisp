@@ -1,3 +1,5 @@
+(in-package :cage433-lisp-utils)
+
 (defvar *test-name* nil)
 
 (defun === (expected actual &key (test #'eql))
@@ -10,7 +12,6 @@
   "Define a test function. Within a test function we can call
    other test functions or use 'check' to run individual test
    cases."
-   (format t "Calling deftest macro with name ~a~%" name)
   `(defun ,name ,parameters
      (let ((result (let ((*test-name* (append *test-name* (list ',name))))
 		      ,@body)))
