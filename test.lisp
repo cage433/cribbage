@@ -18,6 +18,7 @@
 (load-and-compile-if-necessary "unit")
 (load-and-compile-if-necessary "cards")
 (load-and-compile-if-necessary "game")
+(load-and-compile-if-necessary "repl")
 
 (defun run-tests (&key (exit-on-termination t))
   (let ((result 

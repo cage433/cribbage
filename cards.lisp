@@ -121,6 +121,12 @@
     (play-run-value cards)
     (play-thierty-one-value cards)))
 
+(defun card-to-short-string (card)
+  (format nil "~a~a" (card-rank card) (card-suit card)))
+
+(defun display-cards (cards)
+  (format t "~{~a~^, ~}~%" (mapcar #'card-to-short-string cards)))
+
 (defun card-from-name (name)
   (let ((r (position (subseq name 0 (1- (length name))) *RANKS* :test #'string-equal))
         (s (position (subseq name (1- (length name))) *SUITS* :test #'string-equal)))
@@ -151,6 +157,8 @@
     (= 10 (card-rank-value (card-from-name "QH")))
     (= 1 (card-rank-value (card-from-name "AH")))
     (= 5 (card-rank-value (card-from-name "5D")))
+    (=== "10H" (card-to-short-string (card-from-name "10H")) :test #'equal)
+    (=== "AD" (card-to-short-string (card-from-name "AD")) :test #'equal)
     (= 0 (flush-value (hand-from-string "") :crib))
     (= 4 (flush-value (hand-from-string "2H 4H 6H QH") :hand))
     (= 0 (flush-value (hand-from-string "2H 4H 6H QH KD") :crib))
