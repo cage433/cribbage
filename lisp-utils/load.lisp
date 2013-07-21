@@ -38,4 +38,3 @@
     (if exit-on-termination
       (sb-ext:exit :code (if result 0 1))
       result)))
-
