@@ -9,7 +9,7 @@
   discards
   (next-to-play :dealer)
   )
-;(mapcar (lambda (x) (+ x 1)) '(1 2 3))
+
 (defmacro with-game (game-state &body body)
   `(with-slots (dealer pone starter play-cards discards next-to-play) ,game-state
      (labels ((current-play-points() (apply #'+ (mapcar #'card-rank-value play-cards))))
@@ -187,6 +187,7 @@
         (toggle-next-to-play game-state)
         (check (=== :dealer next-to-play))
         ))))
+
 
 (deftest test-game2()
   (let ((game-state (make-game-state 
