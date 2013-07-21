@@ -1,5 +1,3 @@
-(load "unit")
-
 (defstruct card
   rank rank-index rank-value suit)
 

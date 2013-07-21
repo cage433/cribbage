@@ -1,7 +1,5 @@
 (defvar *test-name* nil)
 
-(defparameter +test-names+ nil)
-
 (defun === (expected actual &key (test #'eql))
   (if (funcall test expected actual)
     t
@@ -12,7 +10,7 @@
   "Define a test function. Within a test function we can call
    other test functions or use 'check' to run individual test
    cases."
-   (setf +test-names+ (cons name +test-names+))
+   (format t "Calling deftest macro with name ~a~%" name)
   `(defun ,name ,parameters
      (let ((result (let ((*test-name* (append *test-name* (list ',name))))
 		      ,@body)))

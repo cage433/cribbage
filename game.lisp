@@ -1,5 +1,3 @@
-(load "cards")
-
 (defstruct game-state
   dealer
   pone
@@ -7,11 +5,10 @@
   starter
   play-cards
   discards
-  (next-to-play :dealer)
-  )
+  (next-to-play :dealer))
 
 (defmacro with-game (game-state &body body)
-  `(with-slots (dealer pone starter play-cards discards next-to-play) ,game-state
+  `(with-slots (dealer pone crib starter play-cards discards next-to-play) ,game-state
      (labels ((current-play-points() (apply #'+ (mapcar #'card-rank-value play-cards))))
       (with-slots ((dealer-cards cards) (dealer-crib crib) (dealer-discarder discarder) (dealer-name name)) dealer
         (with-slots ((pone-cards cards) (pone-crib crib) (pone-discarder discarder) (pone-name name)) pone
@@ -23,8 +20,7 @@
   choose-play-card
   (cards nil)
   (crib nil)
-  (points 0)
-  )
+  (points 0))
 
 (defmacro with-player (player &body body)
   `(with-slots (name discarder choose-play-card cards points) ,player
@@ -160,6 +156,7 @@
   (show-dealer game-state)
   )
 
+(format t "Making test-game~%")
 (deftest test-game()
   (let ((game-state (make-game-state 
                :dealer (minimal-player "fred")
