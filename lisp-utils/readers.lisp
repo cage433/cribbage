@@ -45,7 +45,6 @@
 					`#',function-exp)
 				function-exp))
 
-
 (defun add-curry-syntax ()
 "Reader macro for currying functions. Works like, e.g.
 			(macroexpand '[* 10 15]) =>

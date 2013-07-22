@@ -69,8 +69,8 @@
 
 (defun run-value (cards)
   (let* ((by-indices (group-by #'card-rank-index cards))
-         (contiguous-groups (remove-if-not (lambda (g) (>= (length g) 3))
-                                       (cl-utilities:split-sequence-if (lambda (i) (null (gethash i by-indices))) *RANK-INDEXES* :remove-empty-subseqs t)))
+         (contiguous-groups (remove-if-not #_(>= (length _) 3)
+                                       (cl-utilities:split-sequence-if #_(null (gethash _ by-indices)) *RANK-INDEXES* :remove-empty-subseqs t)))
          (value 0))
     (mapc (lambda (group) 
             (incf value (apply #'* (length group) (mapcar (lambda (i) (length (gethash i by-indices))) group))))
@@ -93,7 +93,7 @@
 (defun jack-value (starter hand)
   (if (find (card-suit starter) 
             (mapcar #'card-suit
-                    (remove-if-not (lambda (card) (string-equal (card-rank card) "J")) hand))
+                    (remove-if-not #_(string-equal (card-rank _) "J") hand))
             :test #'string-equal)
     1
     0))

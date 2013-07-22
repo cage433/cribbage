@@ -70,9 +70,8 @@
   (format t "Discard two cards [1-6]~%")
   (let ((chosen-indices (mapcar #'1- (read-numbers))))
     (list
-      (mapcar (lambda (k) (nth k cards)) chosen-indices)
-      (mapcar (lambda (k) (nth k cards))
-              (set-difference '(0 1 2 3 4 5) chosen-indices)))))
+      (mapcar #_(nth _ cards) chosen-indices)
+      (mapcar #_(nth _ cards) (set-difference '(0 1 2 3 4 5) chosen-indices)))))
 
 (defun human-choose-play-cards (cards game-state)
   (declare (ignorable game-state))
@@ -80,7 +79,7 @@
   (format t "Choose card ")
   (let* ((i (read ))
          (card (nth i cards))
-         (remainder (remove-if (lambda (c) (eq c card)) cards)))
+         (remainder (remove-if #_(eq _ card) cards)))
     (list card remainder)))
 
 (defun minimal-player (name)
