@@ -11,44 +11,42 @@
 
 (defmacro with-game (game-state &body body)
   `(with-slots (dealer pone crib starter play-cards discards next-to-play) ,game-state
-     (labels ((current-play-points() (apply #'+ (mapcar #'card-rank-value play-cards))))
-      (declare (ignorable #'current-play-points))
-      (with-slots ((dealer-cards cards) (dealer-crib crib) (dealer-discarder discarder) (dealer-name name)) dealer
-        (with-slots ((pone-cards cards) (pone-crib crib) (pone-discarder discarder) (pone-name name)) pone
-      ,@body)))))
+     (let ((sorted-players (sort (list dealer pone) (lambda (x y) (string< (player-name x) (player-name y))))))
+      (labels ((current-play-points() (apply #'+ (mapcar #'card-rank-value play-cards))))
+        (declare (ignorable #'current-play-points))
+        (with-slots ((dealer-cards cards) (dealer-crib crib) (dealer-discarder discarder) (dealer-name name)) dealer
+          (with-slots ((pone-cards cards) (pone-crib crib) (pone-discarder discarder) (pone-name name)) pone
+        ,@body))))))
 
 (defstruct player
   name
   discarder
+  (is-human nil)
   choose-play-card
   (cards nil)
   (crib nil)
   (points 0))
 
 (defmacro with-player (player &body body)
-  `(with-slots (name discarder choose-play-card cards points) ,player
+  `(with-slots (name discarder is-human choose-play-card cards points) ,player
      (labels ((playable-cards() (remove-if-not (lambda (card) (> (card-rank-value card) (- 31 (current-play-points)))) cards)))
       (declare (ignorable #'playable-cards))
     ,@body)))
 
-(defun print-full-game-state (game-state &key (point-of-view nil))
-  (declare (ignorable point-of-view))
+(defun print-full-game-state (game-state &rest viewable)
   (with-game game-state
     (clear-screen)
-    (format t "Dealer ~a~%Pone ~a~%" dealer-name pone-name)
-    (when crib
-      (format t "Crib~%~0,4T")
-      (display-cards crib))
-    (if (player-cards dealer)
-      (progn
-        (format t "Dealer~%~0,4T")
-        (display-cards (player-cards dealer)))
-      (format t "Dealer has no cards~%"))
-    (if (player-cards pone)
-      (progn
-        (format t "Dealer~%~0,4T")
-        (display-cards (player-cards pone)))
-      (format t "Dealer has no cards~%"))))
+    (mapc #_(with-player _
+             (format t "~a ~a ~a ~%    ~{~a~^ ~}~%" 
+                     name 
+                     (if (equal dealer _) " (D) " "     ")
+                     points 
+                     (if is-human 
+                       (mapcar #'card-to-short-string cards)
+                       (make-list (length cards) :initial-element "XX"))))
+          sorted-players))
+    
+    )
 
 (defun minimal-discarder (cards dealer-or-pone)
   (declare (ignorable dealer-or-pone))
@@ -61,26 +59,36 @@
   (assert cards () "Can't choose from empty hand")
   (list (car cards) (cdr cards)))
 
+(define-condition leave-game (condition) ())
+
 (defun read-numbers()
-  nil)
+  (handler-case 
+    (let ((input (cl-utilities:split-sequence #\Space (read-line) :remove-empty-subseqs t)))
+      (cond ((null input) (format t "Enter 'q' to quit or space separated number(s)") (read-numbers))
+            ((string-equal "q" (string-downcase (car input))) (error 'leave-game))
+            (t (handler-case 
+                (mapcar #'parse-integer input)
+                (parse-error (e) (progn (format t  "Enter 'q' to quit or space separated numbers - couldn't parse ~a~%" input)
+                                        (read-numbers)))))))))
 
 (defun human-choose-discard (cards dealer-or-pone)
   (declare (ignorable cards dealer-or-pone))
+  (clear-screen)
   (display-cards cards)
-  (format t "Discard two cards [1-6]~%")
+  (format t "Choose discards ~%")
   (let ((chosen-indices (mapcar #'1- (read-numbers))))
     (list
       (mapcar #_(nth _ cards) chosen-indices)
       (mapcar #_(nth _ cards) (set-difference '(0 1 2 3 4 5) chosen-indices)))))
 
 (defun human-choose-play-cards (cards game-state)
-  (declare (ignorable game-state))
-  (display-cards cards)
-  (format t "Choose card ")
-  (let* ((i (read ))
-         (card (nth i cards))
-         (remainder (remove-if #_(eq _ card) cards)))
-    (list card remainder)))
+  (with-game game-state
+    (let ((max-rank-value (- 31 (current-play-points))))
+      (format t "Choose card ~%")
+      (let* ((i (1- (car (read-numbers))))
+            (card (nth i cards))
+            (remainder (remove-if #_(eq _ card) cards)))
+        (list card remainder)))))
 
 (defun minimal-player (name)
   (make-player
@@ -89,11 +97,12 @@
     :choose-play-card #'minimal-choose-play-cards
     ))
 
-(defun human-player ()
+(defun human-player (name)
   (make-player
-    :name "fred"
+    :name name
     :discarder #'human-choose-discard 
     :choose-play-card #'human-choose-play-cards
+    :is-human t
     ))
 
 (defun deal-cards (game-state &optional (random-state (make-random-state t)))
@@ -129,7 +138,9 @@
   0)
 
 (defun do-play (game-state)
+  (print-full-game-state game-state)
   (with-game game-state
+    (format t "~%Played cards~%    ~a~%~%" (cards-as-string play-cards))
     (with-player (ecase next-to-play
                    (:dealer dealer)
                    (:pone pone))
@@ -137,10 +148,11 @@
         (dbind (play-card remainder) 
                (funcall choose-play-card cards game-state)
           (when play-card
-            (setf play-cards (cons play-card play-cards))
+            (setf play-cards (append play-cards (list play-card)))
             (incf points (play-points play-cards))
             (setf discards (cons play-card discards))
-            (setf cards remainder))))
+            (setf cards remainder)
+            (format t "~a plays ~a~%" name (card-to-short-string play-card)))))
       (toggle-next-to-play game-state))))
 
 (defun show-pone (game-state)
@@ -149,11 +161,11 @@
 (defun show-dealer (game-state)
   (declare (ignorable game-state)))
 
-(defun play-round (game-state random-state)
+(defun play-round (game-state random-state )
   (deal-cards game-state random-state)
   (discard game-state)
   (while (have-cards game-state)
-         (do-play game-state))
+         (do-play game-state ))
   (show-pone game-state)
   (show-dealer game-state)
   )

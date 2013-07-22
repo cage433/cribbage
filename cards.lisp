@@ -136,8 +136,11 @@
 (defun card-to-short-string (card)
   (format nil "~a~a" (card-rank card) (card-suit card)))
 
+(defun cards-as-string (cards)
+  (format nil "~{~a~^ ~}" (mapcar #'card-to-short-string cards)))
+
 (defun display-cards (cards)
-  (format t "~{~a~^, ~}~%" (mapcar #'card-to-short-string cards)))
+  (format t "~a~%" (cards-as-string cards)))
 
 (defun card-from-name (name)
   (let ((r (position (subseq name 0 (1- (length name))) *RANKS* :test #'string-equal))
