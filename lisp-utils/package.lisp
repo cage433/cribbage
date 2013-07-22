@@ -9,4 +9,5 @@
            :dbind
            :check
            :with-gensyms
+           :for-all
            ))
