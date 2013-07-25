@@ -31,6 +31,7 @@
   (let ((result 
           (combine-results 
             (test-span)
+            (test-take-while)
             (test-anon-functions)
             (test-curry)
             (test-compose)

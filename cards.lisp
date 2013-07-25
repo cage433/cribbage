@@ -118,6 +118,7 @@
   (declare (ignorable cards))
   0)
 
+
 (defun play-run-value (cards)
   (if cards
     (apply #'max 
@@ -136,8 +137,9 @@
     0))
 
 (defun play-thirty-one-value (cards)
-  (declare (ignorable cards))
-  0)
+  (if (= 31 (apply #'+ (mapcar #'card-rank-value cards)))
+    1
+    0))
 
 (defun play-value (cards)
   (+
@@ -234,6 +236,12 @@
     (=== 4 (play-value (hand-from-string "5D 2D 3C 4S")))
     (=== 0 (play-value (hand-from-string "5D 2D 7S 3C 4S")))
     (=== 6 (play-value (hand-from-string "5D 2D 7S 6S 3C 4S")))
+    (=== 1 (play-thirty-one-value (hand-from-string "10C 10D 10S AH")))
+    (=== 0 (play-thirty-one-value (hand-from-string "9C 10D 10S AH")))
+    (=== 0 (play-thirty-one-value nil))
+
+    (=== 0 (play-fifteen-value (hand-from-string "9C 10D 10S AH")))
+    (=== 2 (play-fifteen-value (hand-from-string "9C 6D")))
   ))
 
 

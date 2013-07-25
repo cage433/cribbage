@@ -25,11 +25,28 @@
 								(cons (reverse trues) rest))))
 		(rec '() xs)))
 
+(deftest test-span()
+	(check (equalp '((1 2 3) 4 5 6) (span (lambda (i) (< i 3.5)) '(1 2 3 4 5 6)))))
+
 (defun for-all (pred list)
   (cond ((null list) t)
         ((funcall pred (car list)) (for-all pred (cdr list)))
         (t nil)))
 
-(deftest test-span()
-	(check (equalp '((1 2 3) 4 5 6) (span (lambda (i) (< i 3.5)) '(1 2 3 4 5 6)))))
+
+(defun take-while (pred seq)
+  (labels ((recurse (seq acc)
+                (if (or (null seq) (not (funcall pred (car seq))))
+                  (reverse acc)
+                  (recurse (cdr seq) (cons (car seq) acc)))))
+    (recurse seq nil)))
+
+(deftest test-take-while()
+  (check (=== '(1 2 3) (take-while (lambda (i) (< i 4)) '(1 2 3 4 0)) 
+              :test #'equal))
+  (check (=== nil (take-while (lambda (i) (> i 2)) '(1 2 3 4 5)) 
+              :test #'equal))
+  )
+
+
 
