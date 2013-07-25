@@ -152,9 +152,7 @@
       (:dealer (setf next-to-play :pone))
       (:pone (setf next-to-play :dealer)))))
           
-(defun play-points (play-cards)
-  (declare (ignorable play-cards))
-  0)
+
 
 (defun do-play (game-state)
   (print-full-game-state game-state)
@@ -168,7 +166,7 @@
                (funcall choose-play-card cards-in-hand game-state)
           (when play-card
             (setf play-cards (append play-cards (list play-card)))
-            (incf points (play-points play-cards))
+            (incf points (play-value play-cards))
             (setf cards-in-hand remainder))))
       (toggle-next-to-play game-state))))
 

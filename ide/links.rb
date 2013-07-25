@@ -72,7 +72,7 @@ $map = {"declaration" => "d_declar.htm", "dynamic-extent" => "d_dynami.htm", "ft
 "logandc1" => "f_logand.htm", "logandc2" => "f_logand.htm", "logbitp" => "f_logbtp.htm", "logcount" => "f_logcou.htm", \
 "log" => "f_log.htm", "logical-pathname" => "f_logi_1.htm", "logical-pathname-translations" => "f_logica.htm", "logtest" => "f_logtes.htm", \
 "machine-instance" => "f_mach_i.htm", "machine-type" => "f_mach_t.htm", "machine-version" => "f_mach_v.htm", "macro-function" => "f_macro_.htm", \
-"makunbound" => "f_makunb.htm", "mapc" => "f_mapc_.htm", "mapcar" => "f_mapc_.htm", "mapcan" => "f_mapc_.htm", \
+"makunbound" => "f_makunb.htm", "mapc" => "f_mapc_.htm", "maplist" => "f_mapc_.htm", "mapcar" => "f_mapc_.htm", "mapcan" => "f_mapc_.htm", \
 "mapl" => "f_mapc_.htm", "maphash" => "f_maphas.htm", "map" => "f_map.htm", "map-into" => "f_map_in.htm", \
 "mask-field" => "f_mask_f.htm", "max" => "f_max_m.htm", "min" => "f_max_m.htm", "member" => "f_mem_m.htm", \
 "member-if" => "f_mem_m.htm", "member-if-not" => "f_mem_m.htm", "merge-pathnames" => "f_merge_.htm", "merge" => "f_merge.htm", \

@@ -119,8 +119,21 @@
   0)
 
 (defun play-run-value (cards)
-  (declare (ignorable cards))
-  0)
+  (if cards
+    (apply #'max 
+            (maplist (lambda (sub-ranks) 
+                       (format t "Sub ranks ~a~%" sub-ranks)
+                      (let ((len (length sub-ranks))
+                            (distinct-ranks (remove-duplicates sub-ranks)))
+                        (if (and (>= len 3)
+                                 (= len (length distinct-ranks))
+                                 (= (1- len) 
+                                    (- (apply #'max distinct-ranks) 
+                                       (apply #'min distinct-ranks))))
+                          len
+                          0)))
+                    (reverse (mapcar #'card-rank-value cards))))
+    0))
 
 (defun play-thirty-one-value (cards)
   (declare (ignorable cards))
@@ -213,6 +226,14 @@
     (= 29 (hand-value (card-from-name "5C") (hand-from-string "JC 5S 5D 5H") :crib))
     (= 16 (hand-value (card-from-name "6D") (hand-from-string "3C 3D 3H 9S") :crib))
     (= 17 (hand-value (card-from-name "4H") (hand-from-string "2D 3C 4S 4C") :crib))
+    (= 0 (play-value (hand-from-string "2D 3C")))
+    (=== 3 (play-value (hand-from-string "2D 3C 4S")))
+    (=== 0 (play-value (hand-from-string "3C 4S")))
+    (=== 0 (play-value nil))
+    (=== 0 (play-value (hand-from-string "10D 2D 3C 4S")))
+    (=== 4 (play-value (hand-from-string "5D 2D 3C 4S")))
+    (=== 0 (play-value (hand-from-string "5D 2D 7S 3C 4S")))
+    (=== 6 (play-value (hand-from-string "5D 2D 7S 6S 3C 4S")))
   ))
 
 
