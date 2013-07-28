@@ -10,4 +10,5 @@
            :check
            :with-gensyms
            :for-all
+           :take-while
            ))

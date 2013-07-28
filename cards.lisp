@@ -115,8 +115,16 @@
     0))
 
 (defun play-pairs-and-higher-value (cards)
-  (declare (ignorable cards))
-  0)
+  (if cards
+    (progn
+      (let ((n (length (take-while [equal (card-rank (car cards))] (mapcar #'card-rank (cdr cards))))))
+        (cond 
+          ((= n 0) 0)
+          ((= n 1) 2)
+          ((= n 2) 6)
+          ((= n 3) 12)
+          (t (error (format nil "Unexpected number of matches ~a" cards))))))
+    0))
 
 
 (defun play-run-value (cards)
@@ -228,20 +236,32 @@
     (= 29 (hand-value (card-from-name "5C") (hand-from-string "JC 5S 5D 5H") :crib))
     (= 16 (hand-value (card-from-name "6D") (hand-from-string "3C 3D 3H 9S") :crib))
     (= 17 (hand-value (card-from-name "4H") (hand-from-string "2D 3C 4S 4C") :crib))
-    (= 0 (play-value (hand-from-string "2D 3C")))
-    (=== 3 (play-value (hand-from-string "2D 3C 4S")))
-    (=== 0 (play-value (hand-from-string "3C 4S")))
-    (=== 0 (play-value nil))
-    (=== 0 (play-value (hand-from-string "10D 2D 3C 4S")))
-    (=== 4 (play-value (hand-from-string "5D 2D 3C 4S")))
-    (=== 0 (play-value (hand-from-string "5D 2D 7S 3C 4S")))
-    (=== 6 (play-value (hand-from-string "5D 2D 7S 6S 3C 4S")))
+    (= 0 (play-run-value (hand-from-string "2D 3C")))
+
+    (=== 3 (play-run-value (hand-from-string "2D 3C 4S")))
+    (=== 0 (play-run-value (hand-from-string "3C 4S")))
+    (=== 0 (play-run-value nil))
+    (=== 0 (play-run-value (hand-from-string "10D 2D 3C 4S")))
+    (=== 4 (play-run-value (hand-from-string "5D 2D 3C 4S")))
+    (=== 0 (play-run-value (hand-from-string "5D 2D 7S 3C 4S")))
+    (=== 6 (play-run-value (hand-from-string "5D 2D 7S 6S 3C 4S")))
+
     (=== 1 (play-thirty-one-value (hand-from-string "10C 10D 10S AH")))
     (=== 0 (play-thirty-one-value (hand-from-string "9C 10D 10S AH")))
     (=== 0 (play-thirty-one-value nil))
 
     (=== 0 (play-fifteen-value (hand-from-string "9C 10D 10S AH")))
     (=== 2 (play-fifteen-value (hand-from-string "9C 6D")))
+
+    (=== 12 (play-pairs-and-higher-value (hand-from-string "9C 9D 9H 9S 2C")))
+    (=== 6 (play-pairs-and-higher-value (hand-from-string "9C 9D 9H 10S")))
+    (=== 2 (play-pairs-and-higher-value (hand-from-string "9C 9D 8D 9S")))
+    (=== 2 (play-pairs-and-higher-value (hand-from-string "9C 9D 6D")))
+    (=== 0 (play-pairs-and-higher-value (hand-from-string "7C 9D 6D")))
+    (=== 0 (play-pairs-and-higher-value nil))
+
+    (= 7 (play-value (hand-from-string "AC 5D 3S 2H 4S"))) 
+    (= 14 (play-value (hand-from-string "2C 2D 2S 2H 7S"))) 
   ))
 
 
