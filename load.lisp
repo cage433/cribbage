@@ -6,7 +6,6 @@
 (cage433-lisp-utils:load-and-compile-if-necessary "cl-utilities/package")
 (cage433-lisp-utils:load-and-compile-if-necessary "cl-utilities/split-sequence")
 
-
 (cage433-lisp-utils:load-and-compile-if-necessary "package")
 
 (in-package :cage433-cribbage)
