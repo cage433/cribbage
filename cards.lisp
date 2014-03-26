@@ -131,7 +131,6 @@
   (if cards
     (apply #'max 
             (maplist (lambda (sub-ranks) 
-                       (format t "Sub ranks ~a~%" sub-ranks)
                       (let ((len (length sub-ranks))
                             (distinct-ranks (remove-duplicates sub-ranks)))
                         (if (and (>= len 3)

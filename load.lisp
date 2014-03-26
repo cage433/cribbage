@@ -1,6 +1,5 @@
 (in-package :common-lisp-user)
 
-
 (let ((*default-pathname-defaults* (merge-pathnames #p"lisp-utils/" *default-pathname-defaults*)))
   (load "load"))
 
@@ -20,7 +19,7 @@
   (let ((result 
           (combine-results (test-cards) 
                            (test-game)
-                           (test-game2)
+                           ;(test-game2)
                            (cage433-lisp-utils::run-tests :exit-on-termination nil)
                            )))
     (if exit-on-termination
