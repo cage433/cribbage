@@ -1,5 +1,9 @@
 (in-package :cage433-cribbage)
 
+;(deftest test-rstruct()
+;  (let ((f (make-fred :x 1 :y 2)))
+;    (check (= (fred-x f) 1))))
+
 (defstruct player
   name
   discard

@@ -11,4 +11,5 @@
            :with-gensyms
            :for-all
            :take-while
+           :def-rstruct
            ))
