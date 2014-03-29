@@ -7,10 +7,10 @@
     `(progn
       (defstruct ,name ,@its-slots)
       (defmacro ,macro-name (a-fred &body body)
-        `(with-slots (,@'(,@its-slots)) ,a-fred
+        `(with-slots (,@',its-slots) ,a-fred
           ,@body)))))
 
-(def-rstruct fred x)
+(def-rstruct fred x y)
 
 (let ((f (make-fred :x 1)))
   (with-fred f (format t "x = ~a~%" x)))
