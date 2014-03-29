@@ -1,23 +1,16 @@
 (in-package :cage433-cribbage)
 
-;(deftest test-rstruct()
-;  (let ((f (make-fred :x 1 :y 2)))
-;    (check (= (fred-x f) 1))))
-
-(defstruct player
+(def-rstruct player
   name
   discard
   choose-play-card
   )
 
-(defstruct player-cards
+(def-rstruct player-cards
   deal
   play-cards
   crib-cards)
 
-(defmacro with-player-cards (player-cards &body body)
-  `(with-slots (deal play-cards crib-cards) ,player-cards
-    ,@body))
 
 (defstruct game-state
   dealer

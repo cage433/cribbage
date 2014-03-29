@@ -56,5 +56,8 @@
   `(progn
     (defstruct ,name ,@its-slots)
     (defmacro ,(concat-syms 'with- name) (thing-name &body body)
+                `(with-slots (,@',its-slots) ,thing-name
+        ,@body))
+    (defmacro ,(concat-syms 'with-named- name) (thing-name &body body)
       `(with-slots ,(mapcar (lambda (s) (list (concat-syms thing-name '/ s) s)) ',its-slots) ,thing-name
         ,@body))))
