@@ -3,12 +3,11 @@
     (intern (apply #'concatenate 'string (mapcar #'symbol-name syms))))
 
 (defmacro def-rstruct (name &rest its-slots)
-  (let ((macro-name (concat-syms 'with- 'fred)))
-    `(progn
-      (defstruct ,name ,@its-slots)
-      (defmacro ,macro-name (a-fred &body body)
-        `(with-slots (,@',its-slots) ,a-fred
-          ,@body)))))
+  `(progn
+    (defstruct ,name ,@its-slots)
+    (defmacro ,(concat-syms 'with- name) (X &body body)
+      `(with-slots (,@',its-slots) ,X
+        ,@body))))
 
 (def-rstruct fred x y)
 
