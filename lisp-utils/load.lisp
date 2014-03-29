@@ -35,6 +35,7 @@
             (test-anon-functions)
             (test-curry)
             (test-compose)
+            (test-def-rstruct)
             (test===))))
     (if exit-on-termination
       (sb-ext:exit :code (if result 0 1))

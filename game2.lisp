@@ -12,7 +12,7 @@
   crib-cards)
 
 
-(defstruct game-state
+(def-rstruct game-state
   dealer
   pone
   dealer-cards
@@ -22,18 +22,14 @@
   play-cards
   )
 
-(defmacro with-game-state (game-state &body body)
-  `(with-slots (dealer pone dealer-cards pone-cards starter-card score play-cards) ,game-state
-    ,@body))
-
 (defun initialise-game (dealer pone)
   (let ((deck (shuffled-deck (make-random-state t)))
         (game-state (make-game-state :dealer dealer :pone pone :dealer-cards (make-player-cards) :pone-cards (make-player-cards))))
     (with-game-state game-state
-      (with-player-cards dealer-cards
-        (setf deal (subseq deck 0 6)))
-      (with-player-cards pone-cards
-        (setf deal (subseq deck 6 12)))
+      (with-named-player-cards dealer-cards
+        (with-named-player-cards pone-cards
+          (setf dealer-cards/deal (subseq deck 0 6))
+          (setf pone-cards/deal (subseq deck 6 12))))
       game-state)))
 
 (deftest test-game()

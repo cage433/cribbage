@@ -51,3 +51,17 @@
     (labels ((foo() (lambda (n) (1+ n))))
       (check (= 6 ( { (foo) + } 2 3))))))
 
+(def-rstruct test-struct x y)
+(deftest test-def-rstruct()
+  (combine-results
+    (let ((a (make-test-struct :x 1 :y 2))
+          (b (make-test-struct :x 3 :y 4)))
+      (with-test-struct a (check (= 1 x)))
+      (with-test-struct b (check (= 3 x)))
+      (with-named-test-struct a
+        (check (= 1 a/x)))
+      (with-named-test-struct a
+        (with-named-test-struct b
+              (check (= 1 a/x))
+              (check (= 3 b/x)))
+      ))))
