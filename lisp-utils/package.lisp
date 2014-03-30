@@ -14,4 +14,5 @@
            :def-rstruct
            :info
            :spec
+           :colored-text
            ))

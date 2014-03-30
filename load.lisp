@@ -20,17 +20,20 @@
 (defun compile-and-run-tests()
   (declare #+sbcl(sb-ext:muffle-conditions style-warning))
   (ignore-errors
-  (progn
-      (load-and-compile-source)
-      (let ((result 
-              (combine-results 
-                (test-cards) 
-                (test-game)
-                ;(test-game2)
-                (cage433-lisp-utils::run-tests :exit-on-termination nil)
-                )))
-        (sb-ext:exit :code (if result 0 1)))))
-  (format t "Badness happened~%~%")
+    (progn
+        (load-and-compile-source)
+        (if (and 
+              (test-cards) 
+              (test-game)
+              ;(test-game2)
+              (cage433-lisp-utils::run-tests))
+          (progn
+            (format t (colored-text "Tests passed~%" :green))
+            (sb-ext:exit :code 0))
+          (progn
+            (format t (colored-text "Tests failed~%" :red :bold t))
+            (sb-ext:exit :code 1)))))
+  (format t (colored-text "Badness happened~%~%" :red))
   (sb-ext:exit :code 1))
 
     

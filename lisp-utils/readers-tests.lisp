@@ -1,67 +1,84 @@
 (in-package :cage433-lisp-utils)
 
-(deftest test-anon-functions()
-  (combine-results
-    (check (= 9 (#_(* _ _) 3)))
-    (check (= 27 (#_(* 3 (+ _ 2)) 7)))
-    (check (= 8 (#2_(* _1 _2) 2 4)))
-    (check (= 32 (#2_(* _1 _2 _2) 2 4)))
-    (labels ((plus (x y) (+ x y)))
-      (check (= 6 (#2_(plus _1 _2) 2 4))))
-    (let ((_plus #'+))
-      (check (= 6 (#2_ (funcall _plus _1 _2) 2 4))))))
+(defun test-anon-functions()
+  (info "anon function read macro"
+    (spec "Works for sundry calls"
+      (= 9 (#_(* _ _) 3))
+      (= 27 (#_(* 3 (+ _ 2)) 7))
+      (= 8 (#2_(* _1 _2) 2 4))
+      (= 32 (#2_(* _1 _2 _2) 2 4)))
+    (spec "Works with labels"
+      (labels ((plus (x y) (+ x y)))
+        (= 6 (#2_(plus _1 _2) 2 4))))
+    (spec "Works with sharp signed function"
+      (let ((_plus #'+))
+        (= 6 (#2_ (funcall _plus _1 _2) 2 4))))))
 
 
-(deftest test-curry()
-  (combine-results	
-    (check (= 6 ([+ 4] 2)))
+(defun test-curry()
+  (info "curry read macro"
+    (spec "with '+' special form"
+      (= 6 ([+ 4] 2)))
 
-    (check (= 6 ([#'+ 4] 2)))
+    (spec "with #'+"
+      (= 6 ([#'+ 4] 2)))
 
-    (labels ((plus (x y) (+ x y)))
-      (check (= 6 ([plus 4] 2))))
+    (spec "labels"
+      (labels ((plus (x y) (+ x y)))
+        (= 6 ([plus 4] 2))))
 
-    (flet ((minus (x y) (- x y)))
-      (check (= 6 ([minus 10] 4))))
+    (spec "flet"
+      (flet ((minus (x y) (- x y)))
+        (= 6 ([minus 10] 4))))
 
-    (check (= 6 ([(lambda (x y) (+ x y)) 3] 3)))
+    (spec "lambda"
+      (= 6 ([(lambda (x y) (+ x y)) 3] 3)))
 
-    (let ((plus (lambda (x y) (+ x y))))
-      (check (= 6 ([ _plus 3] 3))))
+    (spec "function variable works with _ syntax"
+      (let ((plus (lambda (x y) (+ x y))))
+        (= 6 ([ _plus 3] 3))))
 
-    (labels ((foo() (lambda (x y) (+ x y))))
-      (check (= 6 ([(foo) 4] 2))))))
+    (spec "labels with lambda"
+      (labels ((foo() (lambda (x y) (+ x y))))
+        (check (= 6 ([(foo) 4] 2)))))))
 
-(deftest test-compose()
-  (combine-results	
-    (check (= 6 ( { #'1+ + } 2 3)))
+(defun test-compose()
+  (info	"compose read macro"
+    (spec "With sharp sign"
+      (= 6 ( { #'1+ + } 2 3)))
+    
+    (spec "With special forms"
+      (= 6 ( { 1+ + } 2 3))
+      (= 7 ( { 1+ 1+ + } 2 3)))
 
-    (check (= 6 ( { 1+ + } 2 3)))
+    (spec "With lambda"
+      (= 6 ( { (lambda (n) (1+ n)) + } 3 2)))
 
-    (check (= 7 ( { 1+ 1+ + } 2 3)))
+    (spec "With labels"
+      (labels ((one-plus (n) (1+ n)))
+        (= 6 ( { one-plus + } 2 3))))
 
-    (labels ((one-plus (n) (1+ n)))
-      (check (= 6 ( { one-plus + } 2 3))))
+    (spec "With function variable"
+      (let ((one-plus (lambda (n) (1+ n))))
+        (= 6 ( { _one-plus + } 2 3))))
 
-    (check (= 6 ( { (lambda (n) (1+ n)) + } 3 2)))
-
-    (let ((one-plus (lambda (n) (1+ n))))
-      (check (= 6 ( { _one-plus + } 2 3))))
-
-    (labels ((foo() (lambda (n) (1+ n))))
-      (check (= 6 ( { (foo) + } 2 3))))))
+    (spec "With function variable and lambda"
+      (labels ((foo() (lambda (n) (1+ n))))
+        (= 6 ( { (foo) + } 2 3))))))
 
 (def-rstruct test-struct x y)
-(deftest test-def-rstruct()
-  (combine-results
-    (let ((a (make-test-struct :x 1 :y 2))
-          (b (make-test-struct :x 3 :y 4)))
-      (with-test-struct a (check (= 1 x)))
-      (with-test-struct b (check (= 3 x)))
+(defun test-def-rstruct()
+  (let ((a (make-test-struct :x 1 :y 2))
+        (b (make-test-struct :x 3 :y 4)))
+    (info "def-rstruct"
+    (spec "with- macro assigns slot values"
+      (with-test-struct a (= 1 x))
+      (with-test-struct b (= 3 x)))
+    (spec "with-named- macro assigns slot values"
       (with-named-test-struct a
-        (check (= 1 a/x)))
+        (= 1 a/x)))
+    (spec "with-named- macro can be nested"
       (with-named-test-struct a
         (with-named-test-struct b
-              (check (= 1 a/x))
-              (check (= 3 b/x)))
-      ))))
+              (and (= 1 a/x)
+                   (= 3 b/x))))))))
