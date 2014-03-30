@@ -1,17 +1,40 @@
+(defun ascii-color (color)
+  (ecase color
+    (:red 31)
+    (:green 32)
+    (:blue 34)))
 
-(defun concat-syms (&rest syms)
-    (intern (apply #'concatenate 'string (mapcar #'symbol-name syms))))
+(defun colored-text (text color &key bold)
+  (format nil "~c[~a~:[~;;1~]m~a~c[0m"
+          #\Esc
+          (ascii-color color)
+          bold
+          text #\Esc))
 
-(defmacro def-rstruct (name &rest its-slots)
-  `(progn
-    (defstruct ,name ,@its-slots)
-    (defmacro ,(concat-syms 'with- name) (thing-name &body body)
-      `(with-slots ,(mapcar (lambda (s) (list (concat-syms thing-name '/ s) s)) ',its-slots) ,thing-name
-        ,@body))))
+(defun run-test (doc-string test-and-forms)
+  (if (null test-and-forms)
+    (progn 
+      (format t "  ~A~%" (colored-text doc-string :green))
+      t)
+    (destructuring-bind (test form) (car test-and-forms)
+      (if test
+        (run-test doc-string (cdr test-and-forms))
+        (progn 
+          (format t "  ~A~%" (colored-text doc-string :red))
+          (format t "    Failing form~%     ~A~%" form)
+          nil)))))
 
-;(format t "~a~% " (macroexpand '(def-rstruct fred x y)))
-(def-rstruct fred x y)
+(defmacro spec (doc-string &body forms)
+  "Run each expression in 'forms' as a test case."
+  `(run-test ,doc-string 
+    (list ,@(mapcar (lambda (f) `(list ,f ',f)) forms))))
 
-;(format t "~a~% " (macroexpand '(with-fred f 33)))
-(let ((f (make-fred :x 1)))
-  (with-fred f (format t "x = ~a~%" (list f/x f/y))))
+(defmacro info (feature &rest specs)
+  `(progn 
+    (format t "~A~%" (colored-text ,feature :blue))
+    (and ,@specs)))
+
+
+
+
+

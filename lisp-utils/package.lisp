@@ -12,4 +12,6 @@
            :for-all
            :take-while
            :def-rstruct
+           :info
+           :spec
            ))
