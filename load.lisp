@@ -23,10 +23,11 @@
     (progn
         (load-and-compile-source)
         (if (and 
+              ;(test-game2)
+              (cage433-lisp-utils::run-tests)
               (test-cards) 
               (test-game)
-              ;(test-game2)
-              (cage433-lisp-utils::run-tests))
+              )
           (progn
             (format t (colored-text "Tests passed~%" :green))
             (sb-ext:exit :code 0))
