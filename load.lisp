@@ -19,22 +19,25 @@
 
 (defun compile-and-run-tests()
   (declare #+sbcl(sb-ext:muffle-conditions style-warning))
-  (ignore-errors
-    (progn
-        (load-and-compile-source)
-        (if (and 
-              ;(test-game2)
-              (cage433-lisp-utils::run-tests)
-              (test-cards) 
-              (test-game)
-              )
-          (progn
-            (format t (colored-text "Tests passed~%" :green))
-            (sb-ext:exit :code 0))
-          (progn
-            (format t (colored-text "Tests failed~%" :red :bold t))
-            (sb-ext:exit :code 1)))))
-  (format t (colored-text "Badness happened~%~%" :red))
-  (sb-ext:exit :code 1))
+  (and
+    (load-and-compile-source)
+    (cage433-lisp-utils::run-tests)
+    (test-cards) 
+    (test-game)))
+
+(defun compile-and-run-tests-and-exit()
+  (declare #+sbcl(sb-ext:muffle-conditions style-warning))
+  (multiple-value-bind (success error-condition)
+    (ignore-errors
+      (compile-and-run-tests))
+    (if success
+      (progn
+        (format t (colored-text "Tests passed~%" :green))
+        (sb-ext:exit :code 0))
+      (progn
+        (if error-condition
+          (format t (colored-text "~a~%" :red) error-condition)
+          (format t (colored-text "Tests failed ~%" :red)))
+        (sb-ext:exit :code 1)))))
 
     
