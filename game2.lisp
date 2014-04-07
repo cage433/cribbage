@@ -102,12 +102,11 @@
 (defun play-a-card (game-state dealer-or-pone)
   (let ((player (game-player game-state dealer-or-pone)))
     (with-player player
-      (let ((chosen-card (funcall choose-play-card game-state play-cards dealer-or-pone)))
-        (when chosen-card
-          (with-game game-state
-            (setf played-cards (cons chosen-card played-cards)))
-          (setf play-cards (remove-if #_(equal _ chosen-card) play-cards))
-          chosen-card)))))
+      (awhen (funcall choose-play-card game-state play-cards dealer-or-pone)
+        (with-game game-state
+          (setf played-cards (cons it played-cards)))
+          (setf play-cards (remove-if #_(equal _ it) play-cards))
+          it))))
 
 
 (defun play-round (game-state)
@@ -125,7 +124,6 @@
 (defun test-play-round()
   (let ((game (initialise-game (make-minimal-player "fred") (make-minimal-player "mike"))))
     (with-game game
-      (discard-cards game)
       (setf dealer/play-cards (hand-from-string "AS AC AD AH"))
       (setf pone/play-cards (hand-from-string "2S 2C 2D 2H"))
       (play-round game)

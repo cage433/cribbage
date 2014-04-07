@@ -36,7 +36,9 @@
   (load-and-compile-if-necessary "unit-testing")
   (load-and-compile-if-necessary "utils")
   (load-and-compile-if-necessary "readers")
-  (load-and-compile-if-necessary "readers-tests"))
+  (load-and-compile-if-necessary "readers-tests")
+  (load-and-compile-if-necessary "anaphors")
+  )
 
 (defun run-tests()
   (and

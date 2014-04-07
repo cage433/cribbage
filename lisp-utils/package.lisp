@@ -7,6 +7,7 @@
            :combine-results
            :===
            :dbind
+           :mbind
            :check
            :with-gensyms
            :for-all
@@ -15,4 +16,7 @@
            :info
            :spec
            :colored-text
+           :aif
+           :awhen
+           :it
            ))

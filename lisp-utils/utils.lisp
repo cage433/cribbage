@@ -5,11 +5,12 @@
 (defun foldl (fn init args)
 	(reduce fn args :initial-value init :from-end nil))
 
-(defmacro dbind (&rest stuff)
-	`(destructuring-bind ,@stuff))
+(defmacro abbrev (short long)
+       `(defmacro ,short (&rest args)
+           `(,',long ,@args)))
 
-(defmacro mbind (&rest stuff)
-	`(multiple-values-bind  ,@stuff))
+(abbrev dbind destructuring-bind)
+(abbrev mbind multiple-value-bind)
 
 (defmacro until (pred &body body)
 	(let ((result (gensym)))
