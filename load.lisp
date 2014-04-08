@@ -15,7 +15,7 @@
   (load-and-compile-if-necessary "utils")
   (load-and-compile-if-necessary "cards")
   ;(load-and-compile-if-necessary "game")
-  (load-and-compile-if-necessary "game2"))
+  (load-and-compile-if-necessary "play/game"))
 
 (defun compile-and-run-tests()
   (declare #+sbcl(sb-ext:muffle-conditions style-warning))
