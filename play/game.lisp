@@ -51,15 +51,6 @@
           (= 13 (length (remove-duplicates (append dealer/deal pone/deal (list starter-card))))))))))
 
 
-(defun discard-cards (game-state)
-  (with-game game-state
-    (dbind (play crib) (funcall dealer/discard dealer/deal :dealer)
-      (setf dealer/play-cards play)
-      (setf dealer/crib-cards crib))
-    (dbind (play crib) (funcall pone/discard pone/deal :pone)
-      (setf pone/play-cards play)
-      (setf pone/crib-cards crib))
-    game-state))
 
 (defun points-left-in-play (game-state)
   (with-game-state game-state
@@ -76,22 +67,6 @@
                                       (let ((points-left (points-left-in-play game-state)))
                                             (find-if #_(<= (card-rank-value _) points-left ) remaining-cards))))))
 
-(defun test-discard-cards()
-  (let ((game (initialise-game (make-minimal-player "fred") (make-minimal-player "mike"))))
-    (with-game game
-      (discard-cards game)
-      (info "After discarding"
-        (spec "Each player should have four cards in hand"
-          (= 4 (length dealer/play-cards))
-          (= 4 (length pone/play-cards)))
-        (spec "Each player should have two cards in the crib"
-          (= 2 (length dealer/crib-cards))
-          (= 2 (length pone/crib-cards)))
-        (spec "All cards should be distinct"
-          (= 12 (length (remove-duplicates (append dealer/crib-cards 
-                                                   dealer/play-cards 
-                                                   pone/crib-cards 
-                                                   pone/play-cards)))))))))
 
 (defun game-player (game-state dealer-or-pone)
   (with-game game-state
@@ -99,54 +74,11 @@
       (:dealer dealer)
       (:pone pone))))
 
-(defun play-a-card (game-state dealer-or-pone)
-  (let ((player (game-player game-state dealer-or-pone)))
-    (with-player player
-      (awhen (funcall choose-play-card game-state play-cards dealer-or-pone)
-        (with-game game-state
-          (setf played-cards (cons it played-cards)))
-          (setf play-cards (remove-if #_(equal _ it) play-cards))
-          it))))
-
-
-(defun play-round (game-state)
-  (with-game game-state
-    (while (or (play-a-card game-state (car play-order))
-                (play-a-card game-state (cadr play-order)))
-      (setf play-order (reverse play-order)))
-    (setf discards (cons played-cards discards))
-    (setf played-cards nil)))
-
-(defun make-test-game()
-  (discard-cards 
-    (initialise-game (make-minimal-player "fred") (make-minimal-player "mike"))))
-
-(defun test-play-round()
-  (let ((game (initialise-game (make-minimal-player "fred") (make-minimal-player "mike"))))
-    (with-game game
-      (setf dealer/play-cards (hand-from-string "AS AC AD AH"))
-      (setf pone/play-cards (hand-from-string "2S 2C 2D 2H"))
-      (play-round game)
-      (info "When playing a round"
-        (spec "all cards will be played if sufficiently low"
-          (null dealer/play-cards)
-          (null pone/play-cards)
-          (= 8 (length (car discards)))
-          )))))
-
-
-
-
-(defun do-play (game-state)
-  (with-game game-state
-    (while (or dealer/play-cards pone/play-cards)
-      (play-round game-state))))
 
 (defun test-game()
   (and
     (test-initialise-game)
-    (test-discard-cards)
-    (test-play-round)))
+    ))
 
 (defun deal (game-state) 
   (declare (ignorable game-state))
