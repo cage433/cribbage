@@ -75,7 +75,7 @@
       (:pone pone))))
 
 
-(defun test-game()
+(defun test-game-state()
   (and
     (test-initialise-game)
     ))

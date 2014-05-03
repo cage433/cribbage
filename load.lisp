@@ -25,7 +25,7 @@
     (load-and-compile-source)
     (cage433-lisp-utils::run-tests)
     (test-cards) 
-    (test-game)
+    (test-game-state)
     (test-discard-cards)
     (test-play-round)
     ))
