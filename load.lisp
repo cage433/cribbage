@@ -14,7 +14,7 @@
   (format t "Loading source ~%")
   (load-and-compile-if-necessary "utils")
   (load-and-compile-if-necessary "cards")
-  (load-and-compile-if-necessary "play/game")
+  (load-and-compile-if-necessary "play/game-state")
   (load-and-compile-if-necessary "play/discard")
   (load-and-compile-if-necessary "play/play")
   )
