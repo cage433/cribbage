@@ -7,16 +7,17 @@
   deal
   play-cards
   crib-cards
+  score
   )
 
 (def-rstruct game-state
   dealer
   pone
   starter-card
-  score
   played-cards
   discards
   play-order 
+  last-to-play 
   )
 
 (defmacro with-game (game-state &body body)
@@ -26,16 +27,22 @@
         ,@body))))
 
 
-(defun initialise-game (dealer pone)
-  (let* ((deck (shuffled-deck (make-random-state t)))
-         (game-state (make-game-state :dealer dealer 
-                                      :pone pone)))
+(defun setup-game (game-state)
+  (let ((deck (shuffled-deck (make-random-state t))))
     (with-game game-state
       (setf dealer/deal (subseq deck 0 6))
       (setf pone/deal (subseq deck 6 12))
       (setf starter-card (nth 13 deck))
-      (setf play-order (list :pone :dealer)))
+      (setf play-order (list :pone :dealer))
+      (setf dealer/score 0)
+      (setf last-to-play nil)
+      (setf pone/score 0))
     game-state))
+
+(defun initialise-game (dealer pone)
+  (let ((game-state (make-game-state :dealer dealer 
+                                     :pone pone)))
+    (setup-game game-state)))
 
 
 (defun test-initialise-game()
@@ -65,7 +72,8 @@
                                   (declare (ignore dealer-or-pone))
                                     (with-game game-state
                                       (let ((points-left (points-left-in-play game-state)))
-                                            (find-if #_(<= (card-rank-value _) points-left ) remaining-cards))))))
+                                            (find-if #_(<= (card-rank-value _) points-left ) remaining-cards))))
+               :score 0))
 
 
 (defun game-player (game-state dealer-or-pone)
@@ -80,19 +88,6 @@
     (test-initialise-game)
     ))
 
-(defun deal (game-state) 
-  (declare (ignorable game-state))
-  'undefined)
-
-(defun play () 'undefined)
-(defun show () 'undefined)
-(defun discards () 'undefined)
-
-(defun play-a-game (game-state)
-  (deal game-state)
-  (discards)
-  (play)
-  (show))
 
 
 

@@ -1,37 +1,8 @@
 (in-package :cage433-cribbage)
 
-(defstruct game-state
-  dealer
-  pone
-  (crib nil)
-  starter
-  play-cards
-  (next-to-play :dealer))
-
-(defstruct player
-  name
-  discarder
-  (is-human nil)
-  choose-play-card
-  (show-cards nil)
-  (cards-in-hand nil)
-  (crib nil)
-  (points 0))
-
-(defmacro with-game (game-state &body body)
-  `(with-slots (dealer pone crib starter play-cards next-to-play) ,game-state
-     (let ((sorted-players (sort (list dealer pone) (lambda (x y) (string< (player-name x) (player-name y))))))
-      (declare (ignorable sorted-players))
-      (labels ((max-playable-rank() (- 31 (apply #'+ (mapcar #'card-rank-value play-cards)))))
-        (declare (ignorable #'max-playable-rank))
-        (with-slots ((dealer-show-cards show-cards) (dealer-cards-in-hand cards-in-hand) (dealer-crib crib) (dealer-discarder discarder) (dealer-name name)) dealer
-          (with-slots ((pone-show-cards show-cards) (pone-cards-in-hand cards-in-hand) (pone-crib crib) (pone-discarder discarder) (pone-name name)) pone
-        ,@body))))))
 
 
-(defmacro with-player (player &body body)
-  `(with-slots (name discarder is-human choose-play-card show-cards cards-in-hand points) ,player
-    ,@body))
+
 
 (defun playable-cards (game-state player)
   (with-game game-state
@@ -39,20 +10,6 @@
       (with-player player
         (remove-if (lambda (card) (> (card-rank-value card) max-rank-value)) cards-in-hand)))))
 
-(defun print-full-game-state (game-state)
-  (with-game game-state
-    (clear-screen)
-    (mapc #_(with-player _
-             (format t "~a ~a ~a ~%    ~{~a~^ ~}~%" 
-                     name 
-                     (if (equal dealer _) " (D) " "     ")
-                     points 
-                     (if is-human 
-                       (mapcar #'card-to-short-string cards-in-hand)
-                       (make-list (length cards-in-hand) :initial-element "XX"))))
-          sorted-players))
-    
-    )
 
 (defun minimal-discarder (cards dealer-or-pone)
   (declare (ignorable dealer-or-pone))
