@@ -32,6 +32,7 @@
     (with-game game-state
       (setf dealer/deal (subseq deck 0 6))
       (setf pone/deal (subseq deck 6 12))
+      (setf discards nil)
       (setf starter-card (nth 13 deck))
       (setf play-order (list :pone :dealer))
       (setf dealer/score 0)
@@ -82,6 +83,47 @@
       (:dealer dealer)
       (:pone pone))))
 
+(defun pad-left (text len)
+  (if (< (length text) len)
+    (concatenate 'string (make-string (- len (length text)) :initial-element #\Space) text)
+    text))
+
+(defun map-tree (fn tree)
+  (cond ((null tree) nil)
+        ((consp tree)
+          (cons (map-tree fn (car tree))
+                (map-tree fn (cdr tree))))
+        (t (funcall fn tree))))
+
+(defun stringify (list-of-rows)
+  (map-tree #_(format nil "~A" _) list-of-rows))
+
+(defun col-widths (list-of-rows)
+  (apply #'mapcar #'max (map-tree #'length (stringify list-of-rows))))
+
+(defun tabulate (&rest list-of-rows)
+  (let ((widths (col-widths list-of-rows))
+        (list-of-text-rows (stringify list-of-rows)))
+    (mapc (lambda (text-row)
+            (format t "~{~A~^ ~}~%" 
+                    (mapcar #'pad-left text-row widths)))
+          list-of-text-rows)))
+
+(defun cards-to-string (cards)
+  (format nil "~{~A~^ ~}" 
+    (mapcar {#_(pad-left _ 3) #'card-to-short-string} cards)))
+
+(defun print-full-game-state (game-state)
+  (with-game game-state
+    (labels ((player-row (player)
+              (with-player player
+                  (list name (cards-to-string play-cards) (cards-to-string played-cards) score))))
+      (tabulate 
+        (list "  Name" "  Cards" "Played cards" "  Score")
+        (player-row dealer)
+        (player-row pone)
+        (list "Discards" (cards-to-string discards) "" ""))
+      game-state)))
 
 (defun test-game-state()
   (and

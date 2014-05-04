@@ -25,47 +25,11 @@
                 (play-a-card game-state (cadr play-order)))
       (setf play-order (reverse play-order)))
     (incf (player-score last-to-play))
-    (setf discards (cons played-cards discards))
+    (setf discards (append played-cards discards))
     (setf played-cards nil))
     game-state)
 
 
-(defun pad-left (text len)
-  (if (< (length text) len)
-    (concatenate 'string (make-string (- len (length text)) :initial-element #\Space) text)
-    text))
-
-(defun map-tree (fn tree)
-  (cond ((null tree) nil)
-        ((consp tree)
-          (cons (map-tree fn (car tree))
-                (map-tree fn (cdr tree))))
-        (t (funcall fn tree))))
-
-(defun stringify (list-of-rows)
-  (map-tree #_(format nil "~A" _) list-of-rows))
-
-(defun col-widths (list-of-rows)
-  (apply #'mapcar #'max (map-tree #'length (stringify list-of-rows))))
-
-(defun tabulate (&rest list-of-rows)
-  (let ((widths (col-widths list-of-rows))
-        (list-of-text-rows (stringify list-of-rows)))
-    (mapc (lambda (text-row)
-            (format t "~{~A~^ ~}~%" 
-                    (mapcar #'pad-left text-row widths)))
-          list-of-text-rows)))
-
-(defun print-full-game-state (game-state)
-  (with-game game-state
-    (labels ((player-row (player)
-              (with-player player
-                  (list name (format nil "~{~A~^ ~}" (mapcar {#_(pad-left _ 3) #'card-to-short-string} play-cards)) score))))
-      (tabulate 
-        (list "  Name" "  Cards" "  Score")
-        (player-row dealer)
-        (player-row pone))
-      game-state)))
 
 (defun test-play-round()
   (let ((game (initialise-game (make-minimal-player "fred") 
@@ -79,7 +43,7 @@
         (spec "all cards will be played"
           (null dealer/play-cards)
           (null pone/play-cards)
-          (= 8 (length (car discards))))
+          (= 8 (length discards)))
         (spec "One player will have at least one point"
           (plusp (+ dealer/score pone/score))))
       (info "when all players have 10 rank cards"
