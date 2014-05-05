@@ -15,13 +15,16 @@
 (defun play-a-card (game-state dealer-or-pone)
   (let ((player (game-player game-state dealer-or-pone)))
     (with-player player
-      (awhen (funcall choose-play-card game-state play-cards dealer-or-pone)
+      (let* ((points-left (points-left-in-play game-state))
+             (cards-to-choose-from (remove-if-not #_(<= (card-rank-value _) points-left ) play-cards)))
+      (awhen (and cards-to-choose-from 
+                  (funcall choose-play-card game-state cards-to-choose-from dealer-or-pone))
         (with-game game-state
           (setf played-cards (cons it played-cards))
-          (setf play-cards (remove-if #_(equal _ it) play-cards))
+          (setf play-cards (remove-if #_(equalp _ it) play-cards))
           (setf last-to-play (game-player game-state dealer-or-pone))
           (add-points game-state dealer-or-pone (play-value played-cards))
-          it)))))
+          it))))))
 
 (defun play-order (game-state)
   (with-game game-state
@@ -33,6 +36,7 @@
   (with-game game-state
     (while (match (play-order game-state)
               ((list first-to-play second-to-play)
+                (print-full-game-state game-state)
                 (or (play-a-card game-state first-to-play)
                     (play-a-card game-state second-to-play)))))
     (incf (player-score last-to-play))
@@ -94,6 +98,7 @@
 (defun play-rounds (game-state)
   (with-game game-state
     (while (or dealer/play-cards pone/play-cards)
+      (print-full-game-state game-state)
       (play-sequence game-state))
     game-state))
 
@@ -109,37 +114,60 @@
         (spec "dealer will have 3 = (pair on first round plus last card on second)"
             (=== 3 dealer/score))))))
 
-
-(defun input-cards(cards-to-choose-from)
+(defun choose-cards(message cards-to-choose-from)
+  (format t "~%~A: " message)
+  (finish-output nil)
   (handler-case (let ((choice (hand-from-string (read-line))))
                   (if (subsetp choice cards-to-choose-from :test #'equalp)
                     choice
                     (progn (format t "Invalid choice~%")
-                           (input-cards cards-to-choose-from))))
-    (error () (format t "Not valid cards ~%") (input-cards cards-to-choose-from))))
+                           (choose-cards message cards-to-choose-from))))
+    (error () (format t "Not valid cards ~%") (choose-cards message cards-to-choose-from))))
+
+(defun choose-crib-cards (dealt-cards)
+  (let ((crib-cards (choose-cards "Choose crib" dealt-cards)))
+    (if (= 2 (length crib-cards))
+      crib-cards
+      (progn
+        (format t "Choose exactly two cards~%")
+        (finish-output nil)
+        (choose-crib-cards dealt-cards)))))
+
+(defun input-play-card (cards-to-play)
+  (let ((chosen (choose-cards "Play" cards-to-play)))
+    (if (= 1 (length chosen))
+      (car chosen)
+      (progn
+        (format t "Choose exactly one card~%")
+        (finish-output nil)
+        (input-play-card cards-to-play)))))
+
 
 (defun make-human-player (name)
   (make-player :name name
                :discard (lambda (cards dealer-or-pone)
                           (declare (ignorable dealer-or-pone))
-                          (let ((discards (input-cards cards)))
+                          (let ((discards (choose-crib-cards cards)))
                             (list (set-difference cards discards :test #'equalp)
                                   discards)))
                :choose-play-card (lambda (game-state remaining-cards dealer-or-pone)
                                    (declare (ignorable game-state dealer-or-pone))
-                                   (input-cards remaining-cards))
+                                   (input-play-card remaining-cards))
                :score 0))
 
 
 (defun play-game (game-state)
   (with-game game-state
     (handler-case 
-      (while t
-        (play-rounds game-state)
-        (add-points game-state :pone (hand-value starter-card pone/play-cards :hand))
-        (add-points game-state :dealer (hand-value starter-card dealer/play-cards :hand))
-        (add-points game-state :dealer (hand-value starter-card (append dealer/crib-cards pone/crib-cards) :crib))
-        )
+      (progn
+        (print-full-game-state game-state)
+        (discard-cards game-state)
+        (while t
+          (print-full-game-state game-state)
+          (play-rounds game-state)
+          (add-points game-state :pone (hand-value starter-card pone/play-cards :hand))
+          (add-points game-state :dealer (hand-value starter-card dealer/play-cards :hand))
+          (add-points game-state :dealer (hand-value starter-card (append dealer/crib-cards pone/crib-cards) :crib))))
       (player-has-won (c) (format t "Game was won by ~A~%" (player-name (winning-player c)))))))
 
 

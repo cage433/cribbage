@@ -121,13 +121,22 @@
   (with-game game-state
     (labels ((player-row (player)
               (with-player player
-                  (list name (cards-to-string play-cards) (cards-to-string played-cards) score))))
-      (tabulate 
-        (list "  Name" "  Cards" "Played cards" "  Score")
-        (player-row dealer)
-        (player-row pone)
-        (list "Discards" (cards-to-string discards) "" ""))
-      game-state)))
+                  (list name 
+                        (cards-to-string play-cards) 
+                        (cards-to-string crib-cards)
+                         score))))
+      (if dealer/play-cards
+        (tabulate 
+          (list "  Name" "Play" "Crib" "  Score")
+          (player-row dealer)
+          (player-row pone))
+        (tabulate
+          (list " Name" "Cards")
+          (list dealer/name (cards-to-string dealer/deal))
+          (list pone/name (cards-to-string pone/deal))))
+      (if played-cards
+        (format t "Played ~A~%" (cards-to-string played-cards)))
+      nil)))
 
 (defun test-game-state()
   (and
