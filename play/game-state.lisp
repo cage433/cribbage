@@ -18,6 +18,7 @@
   discards
   play-order 
   last-to-play 
+  points-to-win
   )
 
 (defmacro with-game (game-state &body body)
@@ -27,7 +28,7 @@
         ,@body))))
 
 
-(defun setup-game (game-state)
+(defun setup-game (game-state &optional (needed-to-win 61))
   (let ((deck (shuffled-deck (make-random-state t))))
     (with-game game-state
       (setf dealer/deal (subseq deck 0 6))
@@ -37,13 +38,16 @@
       (setf play-order (list :pone :dealer))
       (setf dealer/score 0)
       (setf last-to-play nil)
-      (setf pone/score 0))
+      (setf pone/score 0)
+      (setf points-to-win needed-to-win)
+      )
+
     game-state))
 
-(defun initialise-game (dealer pone)
+(defun initialise-game (dealer pone &optional (needed-to-win 61))
   (let ((game-state (make-game-state :dealer dealer 
                                      :pone pone)))
-    (setup-game game-state)))
+    (setup-game game-state needed-to-win)))
 
 
 (defun test-initialise-game()

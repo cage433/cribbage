@@ -1,11 +1,16 @@
 (in-package :cage433-cribbage)
 
-(defun play-value (cards)
-  (+
-    (play-fifteen-value cards)
-    (play-pairs-and-higher-value cards)
-    (play-run-value cards)
-    (play-thirty-one-value cards)))
+(define-condition player-has-won (error)
+  ((player :initarg :player :reader winning-player)))
+
+(defun add-points (game-state dealer-or-pone points)
+  (let ((player (game-player game-state dealer-or-pone)))
+    (with-player player
+      (with-game game-state
+        (incf score points)
+        (if (>= score points-to-win)
+          (error 'player-has-won :player player))))))
+
 
 (defun play-a-card (game-state dealer-or-pone)
   (let ((player (game-player game-state dealer-or-pone)))
@@ -15,35 +20,44 @@
           (setf played-cards (cons it played-cards))
           (setf play-cards (remove-if #_(equal _ it) play-cards))
           (setf last-to-play (game-player game-state dealer-or-pone))
-          (incf score (play-value played-cards))
+          (add-points game-state dealer-or-pone (play-value played-cards))
           it)))))
 
-
-(defun play-round (game-state)
+(defun play-order (game-state)
   (with-game game-state
-    (while (or (play-a-card game-state (car play-order))
-                (play-a-card game-state (cadr play-order)))
-      (setf play-order (reverse play-order)))
+    (cond ((null last-to-play) (list :pone :dealer)) ; No-one played yet
+          ((equalp last-to-play pone) (list :dealer :pone))
+          ((equalp last-to-play dealer) (list :pone :dealer)))))
+
+(defun play-sequence (game-state)
+  (with-game game-state
+    (while (match (play-order game-state)
+              ((list first-to-play second-to-play)
+                (or (play-a-card game-state first-to-play)
+                    (play-a-card game-state second-to-play)))))
     (incf (player-score last-to-play))
     (setf discards (append played-cards discards))
     (setf played-cards nil))
     game-state)
 
 
-
-(defun test-play-round()
+(defun test-game()
   (let ((game (initialise-game (make-minimal-player "fred") 
                                (make-minimal-player "mike"))))
+    (setup-game game)
+    game))
+
+(defun test-play-single-round()
+  (let ((game (test-game)))
     (with-game game
       (info "When playing a round with sufficiently low cards"
-        (setup-game game)
         (setf dealer/play-cards (hand-from-string "AS AC AD AH"))
         (setf pone/play-cards (hand-from-string "2S 2C 2D 2H"))
-        (play-round game)
+        (play-sequence game)
         (spec "all cards will be played"
           (null dealer/play-cards)
           (null pone/play-cards)
-          (= 8 (length discards)))
+          (=== 8 (length discards)))
         (spec "One player will have at least one point"
           (plusp (+ dealer/score pone/score))))
       (info "when all players have 10 rank cards"
@@ -51,18 +65,87 @@
           (setf dealer/play-cards (hand-from-string "10C JS"))
           (setf pone/play-cards (hand-from-string "QC KH"))
           (progn (setf played-cards nil) t)
-          (print-full-game-state game)
-          (play-round game)
-          (print-full-game-state game)
+          (play-sequence game)
         (spec "pone will have a single point"
-          (= 1 pone/score)))
-      )))
+          (=== 1 pone/score)))
+      (info "when both players have a pair of 10s"
+          (setup-game game)
+          (setf dealer/play-cards (hand-from-string "10C 10S"))
+          (setf pone/play-cards (hand-from-string "10D 10H"))
+          (progn (setf played-cards nil) t)
+          (play-sequence game)
+          (spec "pone will have 7 = (3 of a kind + last card)"
+            (=== 7 pone/score))
+          (spec "dealer will have 2 = (pair)"
+            (=== 2 dealer/score)))
+      (info "When cards add up to 31"
+          (setup-game game)
+          (setf dealer/play-cards (hand-from-string "10C JC"))
+          (setf pone/play-cards (hand-from-string "QS KS AD"))
+          (progn (setf played-cards nil) t)
+          (play-sequence game)
+          (spec "pone will have 2 points"
+            (=== 2 pone/score))
+            ))))
 
 
 
 
-(defun do-play (game-state)
+(defun play-rounds (game-state)
   (with-game game-state
     (while (or dealer/play-cards pone/play-cards)
-      (play-round game-state))))
+      (play-sequence game-state))
+    game-state))
+
+(defun test-play-rounds()
+  (let ((game (test-game)))
+    (with-game game
+      (info "When playing with all 10s"
+        (setf dealer/play-cards (hand-from-string "10C 10S"))
+        (setf pone/play-cards (hand-from-string "10D 10H"))
+        (play-rounds game)
+        (spec "pone will have 7 = (3 of a kind plus last card)"
+            (=== 7 pone/score))
+        (spec "dealer will have 3 = (pair on first round plus last card on second)"
+            (=== 3 dealer/score))))))
+
+
+(defun input-cards(cards-to-choose-from)
+  (handler-case (let ((choice (hand-from-string (read-line))))
+                  (if (subsetp choice cards-to-choose-from :test #'equalp)
+                    choice
+                    (progn (format t "Invalid choice~%")
+                           (input-cards cards-to-choose-from))))
+    (error () (format t "Not valid cards ~%") (input-cards cards-to-choose-from))))
+
+(defun make-human-player (name)
+  (make-player :name name
+               :discard (lambda (cards dealer-or-pone)
+                          (declare (ignorable dealer-or-pone))
+                          (let ((discards (input-cards cards)))
+                            (list (set-difference cards discards :test #'equalp)
+                                  discards)))
+               :choose-play-card (lambda (game-state remaining-cards dealer-or-pone)
+                                   (declare (ignorable game-state dealer-or-pone))
+                                   (input-cards remaining-cards))
+               :score 0))
+
+
+(defun play-game (game-state)
+  (with-game game-state
+    (handler-case 
+      (while t
+        (play-rounds game-state)
+        (add-points game-state :pone (hand-value starter-card pone/play-cards :hand))
+        (add-points game-state :dealer (hand-value starter-card dealer/play-cards :hand))
+        (add-points game-state :dealer (hand-value starter-card (append dealer/crib-cards pone/crib-cards) :crib))
+        )
+      (player-has-won (c) (format t "Game was won by ~A~%" (player-name (winning-player c)))))))
+
+
+  
+;(defun play-hand(game-state)
+;  (play-rounds game-state)
+          
+
 

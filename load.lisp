@@ -25,12 +25,12 @@
   (declare #+sbcl(sb-ext:muffle-conditions style-warning))
   (if (load-and-compile-source)
     (and
-      (load-and-compile-source)
       (cage433-lisp-utils::run-tests)
       (test-cards) 
       (test-game-state)
       (test-discard-cards)
-      (test-play-round)
+      (test-play-single-round)
+      (test-play-rounds)
       )))
 
 (defun load-scratch()
@@ -56,5 +56,7 @@
     
 (defun ci()
     (run-ci-function #'compile-and-run-tests)
-    ;(run-ci-function #'load-scratch)
+;    (progn
+;      (load-and-compile-source)
+;      (run-ci-function #'load-scratch))
     )
