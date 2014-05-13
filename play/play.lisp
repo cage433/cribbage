@@ -36,7 +36,9 @@
   (with-game game-state
     (while (match (play-order game-state)
               ((list first-to-play second-to-play)
+                (clear-screen)
                 (print-full-game-state game-state)
+                (sleep 0.5)
                 (or (play-a-card game-state first-to-play)
                     (play-a-card game-state second-to-play)))))
     (incf (player-score last-to-play))
@@ -98,7 +100,6 @@
 (defun play-rounds (game-state)
   (with-game game-state
     (while (or dealer/play-cards pone/play-cards)
-      (print-full-game-state game-state)
       (play-sequence game-state))
     game-state))
 
@@ -163,11 +164,17 @@
         (print-full-game-state game-state)
         (discard-cards game-state)
         (while t
-          (print-full-game-state game-state)
+          (print-full-game-state game-state "About to play")
           (play-rounds game-state)
-          (add-points game-state :pone (hand-value starter-card pone/play-cards :hand))
-          (add-points game-state :dealer (hand-value starter-card dealer/play-cards :hand))
-          (add-points game-state :dealer (hand-value starter-card (append dealer/crib-cards pone/crib-cards) :crib))))
+          (add-points game-state :pone (hand-value starter-card pone/original-play-cards :hand))
+          (add-points game-state :dealer (hand-value starter-card dealer/original-play-cards :hand))
+          (add-points game-state :dealer (hand-value starter-card (append dealer/crib-cards pone/crib-cards) :crib))
+          (sleep 1.0)
+          (clear-screen)
+          (deal-and-discard game-state)
+          (discard-cards game-state)
+          (print-full-game-state game-state "setup for next round")
+          ))
       (player-has-won (c) (format t "Game was won by ~A~%" (player-name (winning-player c)))))))
 
 

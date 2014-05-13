@@ -5,6 +5,7 @@
   discard
   choose-play-card
   deal
+  original-play-cards
   play-cards
   crib-cards
   score
@@ -16,9 +17,9 @@
   starter-card
   played-cards
   discards
-  play-order 
   last-to-play 
   points-to-win
+  state
   )
 
 (defmacro with-game (game-state &body body)
@@ -27,27 +28,65 @@
       (with-named-player pone
         ,@body))))
 
+(defmacro check-that (message form)
+  `(if (not ,form)
+     (progn
+       (format nil "Assertion ~A failed: ~A~%" ,message 'form)
+       (assert ,form))))
 
-(defun setup-game (game-state &optional (needed-to-win 61))
+(defun check-state (game-state)
+  (with-game game-state
+    (case state
+      (:pre-deal
+        (check-that "No cards"
+                    (and (null starter-card)
+                         (null played-cards)
+                         (null discards)
+                         (null last-to-play)))
+        (check-that "Dealer has no cards"
+                    (and
+                      (null dealer/deal)
+                      (null dealer/play-cards)
+                      (null dealer/crib-cards))
+                    )
+       (check-that "Pone has no cards"
+                    (and
+                      (null pone/deal)
+                      (null pone/play-cards)
+                      (null pone/crib-cards)))))))
+
+
+
+(defun deal-and-discard (game-state)
   (let ((deck (shuffled-deck (make-random-state t))))
     (with-game game-state
+      (check-state game-state)
       (setf dealer/deal (subseq deck 0 6))
       (setf pone/deal (subseq deck 6 12))
+      (setf dealer/play-cards nil)
+      (setf pone/play-cards nil)
+      (setf dealer/original-play-cards nil)
+      (setf pone/original-play-cards nil)
+      (setf dealer/crib-cards nil)
+      (setf pone/crib-cards nil)
       (setf discards nil)
-      (setf starter-card (nth 13 deck))
-      (setf play-order (list :pone :dealer))
+      (setf starter-card (nth 13 deck)))
+    game-state))
+
+(defun setup-game (game-state)
+  (deal-and-discard game-state)
+  (with-game game-state
       (setf dealer/score 0)
       (setf last-to-play nil)
       (setf pone/score 0)
-      (setf points-to-win needed-to-win)
       )
-
-    game-state))
+    game-state)
 
 (defun initialise-game (dealer pone &optional (needed-to-win 61))
   (let ((game-state (make-game-state :dealer dealer 
-                                     :pone pone)))
-    (setup-game game-state needed-to-win)))
+                                     :pone pone
+                                     :points-to-win needed-to-win)))
+    (setup-game game-state)))
 
 
 (defun test-initialise-game()
@@ -117,25 +156,23 @@
   (format nil "~{~A~^ ~}" 
     (mapcar {#_(pad-left _ 3) #'card-to-short-string} cards)))
 
-(defun print-full-game-state (game-state)
+(defun print-full-game-state (game-state &optional message )
   (with-game game-state
     (labels ((player-row (player)
               (with-player player
                   (list name 
-                        (cards-to-string play-cards) 
+                        (format nil "~{~A~^ ~}" 
+                                (mapcar (lambda (x) (if (member x play-cards) (pad-left (card-to-short-string x) 3) "   ")) original-play-cards))
                         (cards-to-string crib-cards)
                          score))))
-      (if dealer/play-cards
-        (tabulate 
-          (list "  Name" "Play" "Crib" "  Score")
-          (player-row dealer)
-          (player-row pone))
-        (tabulate
-          (list " Name" "Cards")
-          (list dealer/name (cards-to-string dealer/deal))
-          (list pone/name (cards-to-string pone/deal))))
+      (if message
+        (format t "~A~%" message))
+      (tabulate 
+        (list "  Name" "Play" "      Crib" "    Score")
+        (player-row dealer)
+        (player-row pone))
       (if played-cards
-        (format t "Played ~A~%" (cards-to-string played-cards)))
+        (format t "~%Played ~A~%~%" (reverse(cards-to-string played-cards))))
       nil)))
 
 (defun test-game-state()
