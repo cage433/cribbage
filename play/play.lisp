@@ -36,9 +36,7 @@
   (with-game game-state
     (while (match (play-order game-state)
               ((list first-to-play second-to-play)
-                (clear-screen)
-                (print-game-state game-state)
-                (sleep 0.5)
+                (funcall *print-game-state-fn* game-state :after-fn (lambda ()(sleep 0.5)))
                 (or (play-a-card game-state first-to-play)
                     (play-a-card game-state second-to-play)))))
     (incf (player-score last-to-play))
@@ -146,7 +144,7 @@
 
 (defun make-human-player (name)
   (make-player :name name
-               :discard (lambda (cards dealer-or-pone)
+               :choose-crib-cards (lambda (cards dealer-or-pone)
                           (declare (ignorable dealer-or-pone))
                           (let ((discards (choose-crib-cards cards)))
                             (list (set-difference cards discards :test #'equalp)
@@ -161,19 +159,17 @@
   (with-game game-state
     (handler-case 
       (progn
-        (print-game-state game-state)
         (discard-cards game-state)
         (while t
-          (print-game-state game-state "About to play")
+          (funcall *print-game-state-fn* game-state :message "About to play")
           (play-rounds game-state)
           (add-points game-state :pone (hand-value starter-card pone/original-play-cards :hand))
           (add-points game-state :dealer (hand-value starter-card dealer/original-play-cards :hand))
           (add-points game-state :dealer (hand-value starter-card (append dealer/crib-cards pone/crib-cards) :crib))
-          (sleep 1.0)
-          (clear-screen)
+          (rotatef dealer pone)
           (deal-and-discard game-state)
           (discard-cards game-state)
-          (print-game-state game-state "setup for next round")
+          (funcall *print-game-state-fn* game-state :message "setup for next round" :after-fn (lambda ()(sleep 1.0)))
           ))
       (player-has-won (c) (format t "Game was won by ~A~%" (player-name (winning-player c)))))))
 

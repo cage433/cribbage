@@ -2,7 +2,7 @@
 
 (def-rstruct player
   name
-  discard
+  choose-crib-cards
   choose-play-card
   deal
   original-play-cards
@@ -109,7 +109,7 @@
 
 (defun make-minimal-player (name)
   (make-player :name name
-               :discard (lambda (cards dealer-or-pone) 
+               :choose-crib-cards (lambda (cards dealer-or-pone) 
                           (declare (ignore dealer-or-pone))
                           (list (subseq cards 0 4) (subseq cards 4 6)))
                :choose-play-card (lambda (game-state remaining-cards dealer-or-pone)
@@ -156,7 +156,12 @@
   (format nil "~{~A~^ ~}" 
     (mapcar {#_(pad-left _ 3) #'card-to-short-string} cards)))
 
-(defun print-game-state (game-state &optional message )
+(defparameter *print-game-state-fn*
+  (lambda (game-state &key message (after-fn (lambda ())))
+    (declare (ignore game-state message after-fn))))
+
+(defun print-game-state (game-state &key message (after-fn (lambda ())))
+  (clear-screen)
   (with-game game-state
     (labels ((player-row (player)
               (with-player player
@@ -173,6 +178,7 @@
         (player-row pone))
       (if played-cards
         (format t "~%Played ~A~%~%" (reverse(cards-to-string played-cards))))
+      (funcall after-fn)
       nil)))
 
 (defun test-game-state()

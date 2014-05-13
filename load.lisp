@@ -55,8 +55,9 @@
 
     
 (defun ci()
-    ;(run-ci-function #'compile-and-run-tests)
-    (progn
-      (load-and-compile-source)
-      (run-ci-function #'load-scratch))
+    (run-ci-function #'compile-and-run-tests)
+;    (progn
+;      (load-and-compile-source)
+;        (sb-ext:exit :code 0)
+;      (run-ci-function #'load-scratch))
     )

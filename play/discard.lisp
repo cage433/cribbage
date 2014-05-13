@@ -2,11 +2,11 @@
 
 (defun discard-cards (game-state)
   (with-game game-state
-    (dbind (play crib) (funcall dealer/discard dealer/deal :dealer)
+    (dbind (play crib) (funcall dealer/choose-crib-cards dealer/deal :dealer)
       (setf dealer/play-cards play)
       (setf dealer/original-play-cards play)
       (setf dealer/crib-cards crib))
-    (dbind (play crib) (funcall pone/discard pone/deal :pone)
+    (dbind (play crib) (funcall pone/choose-crib-cards pone/deal :pone)
       (setf pone/play-cards play)
       (setf pone/original-play-cards play)
       (setf pone/crib-cards crib))
