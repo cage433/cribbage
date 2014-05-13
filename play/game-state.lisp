@@ -156,7 +156,7 @@
   (format nil "~{~A~^ ~}" 
     (mapcar {#_(pad-left _ 3) #'card-to-short-string} cards)))
 
-(defun print-full-game-state (game-state &optional message )
+(defun print-game-state (game-state &optional message )
   (with-game game-state
     (labels ((player-row (player)
               (with-player player

@@ -112,7 +112,7 @@
 
 
 (defun do-play (game-state)
-  (print-full-game-state game-state)
+  (print-game-state game-state)
   (with-game game-state
     (format t "~%Played cards~%    ~a~%~%" (cards-as-string play-cards))
     (with-player (ecase next-to-play
