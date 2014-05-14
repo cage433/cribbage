@@ -169,7 +169,7 @@
           (add-points game-state :dealer (hand-value starter-card dealer/original-play-cards :hand))
           (add-points game-state :dealer (hand-value starter-card (append dealer/crib-cards pone/crib-cards) :crib))
           (rotatef dealer pone)
-          (deal-and-discard game-state)
+          (deal-game game-state)
           (discard-cards game-state)
           (funcall *print-game-state-fn* game-state :message "setup for next round" :after-fn (lambda ()(sleep 1.0)))
           ))

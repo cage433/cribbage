@@ -28,24 +28,30 @@
       (with-named-player pone
         ,@body))))
 
+(defun clear-game (game-state)
+  (with-game game-state
+    (setf dealer/deal nil)
+    (setf pone/deal nil)
+    (setf dealer/play-cards nil)
+    (setf pone/play-cards nil)
+    (setf dealer/original-play-cards nil)
+    (setf pone/original-play-cards nil)
+    (setf dealer/crib-cards nil)
+    (setf pone/crib-cards nil)
+    (setf discards nil)
+    (setf starter-card nil)))
 
-(defun deal-and-discard (game-state)
+(defun deal-game (game-state)
+  (clear-game game-state)
   (let ((deck (shuffled-deck (make-random-state t))))
     (with-game game-state
       (setf dealer/deal (subseq deck 0 6))
       (setf pone/deal (subseq deck 6 12))
-      (setf dealer/play-cards nil)
-      (setf pone/play-cards nil)
-      (setf dealer/original-play-cards nil)
-      (setf pone/original-play-cards nil)
-      (setf dealer/crib-cards nil)
-      (setf pone/crib-cards nil)
-      (setf discards nil)
       (setf starter-card (nth 13 deck)))
     game-state))
 
 (defun setup-game (game-state)
-  (deal-and-discard game-state)
+  (deal-game game-state)
   (with-game game-state
       (setf dealer/score 0)
       (setf last-to-play nil)
