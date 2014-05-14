@@ -14,6 +14,9 @@
 (defun clear-screen()
   (format t "~c~a~c~a" #\Escape "[H" #\Escape "[2J"))
 
+(defun newline()
+  (format t "~%"))
+
 (defun in-colour (colour str)
   (format t "~c~a~a~c~a" #\Escape colour str #\Escape "[0m"))
 

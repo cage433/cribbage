@@ -146,6 +146,8 @@
   (make-player :name name
                :choose-crib-cards (lambda (cards dealer-or-pone)
                           (declare (ignorable dealer-or-pone))
+                          (clear-screen)
+                          (format t "Cards are ~A~%" (cards-to-string cards))
                           (let ((discards (choose-crib-cards cards)))
                             (list (set-difference cards discards :test #'equalp)
                                   discards)))

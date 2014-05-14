@@ -28,39 +28,10 @@
       (with-named-player pone
         ,@body))))
 
-(defmacro check-that (message form)
-  `(if (not ,form)
-     (progn
-       (format nil "Assertion ~A failed: ~A~%" ,message 'form)
-       (assert ,form))))
-
-(defun check-state (game-state)
-  (with-game game-state
-    (case state
-      (:pre-deal
-        (check-that "No cards"
-                    (and (null starter-card)
-                         (null played-cards)
-                         (null discards)
-                         (null last-to-play)))
-        (check-that "Dealer has no cards"
-                    (and
-                      (null dealer/deal)
-                      (null dealer/play-cards)
-                      (null dealer/crib-cards))
-                    )
-       (check-that "Pone has no cards"
-                    (and
-                      (null pone/deal)
-                      (null pone/play-cards)
-                      (null pone/crib-cards)))))))
-
-
 
 (defun deal-and-discard (game-state)
   (let ((deck (shuffled-deck (make-random-state t))))
     (with-game game-state
-      (check-state game-state)
       (setf dealer/deal (subseq deck 0 6))
       (setf pone/deal (subseq deck 6 12))
       (setf dealer/play-cards nil)
@@ -170,16 +141,43 @@
                                 (mapcar (lambda (x) (if (member x play-cards) (pad-left (card-to-short-string x) 3) "   ")) original-play-cards))
                         (cards-to-string crib-cards)
                          score))))
-      (if message
-        (format t "~A~%" message))
+      (format t "~A~%" (or message ""))
       (tabulate 
         (list "  Name" "Play" "      Crib" "    Score")
         (player-row dealer)
         (player-row pone))
-      (if played-cards
-        (format t "~%Played ~A~%~%" (reverse(cards-to-string played-cards))))
+      (format t "~%Played ~A~%~%" (cards-to-string (reverse played-cards)))
       (funcall after-fn)
       nil)))
+
+(defun print-full-game-state (game-state &key message (after-fn (lambda ())))
+  (print-game-state game-state :message message :after-fn (lambda ()))
+  (with-game game-state
+    (labels ((pr (name value &key (key #'identity)) 
+                 (format t "~A: ~A~%" name (if value (funcall key value) "nil")))
+             (player-text (player)
+                (with-player player
+                  (pr "  Name " name)
+                  (pr "  Deal " (cards-to-string deal))
+                  (pr "  Original play " (cards-to-string original-play-cards))
+                  (pr "  play " (cards-to-string play-cards))
+                  (pr "  Crib " (cards-to-string crib-cards))
+                  (pr "  Score " score)
+                  )))
+      (newline)
+      (pr "Starter" starter-card :key #'card-to-short-string)
+      (pr "Played cards" (reverse played-cards) :key #'cards-to-string)
+      (pr "Discards" discards :key #'cards-to-string)
+      (pr "last-to-play" (if last-to-play (player-name last-to-play)))
+      (pr "points-to-win" points-to-win)
+      (pr "State" state)
+      (newline)
+      (pr "Dealer   " "")
+      (player-text dealer)
+      (newline)
+      (pr "Pone   " "")
+      (player-text pone)
+      (funcall after-fn))))
 
 (defun test-game-state()
   (and
