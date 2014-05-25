@@ -1,5 +1,6 @@
 (in-package :cage433-cribbage)
 
+
 (define-condition player-has-won (error)
   ((player :initarg :player :reader winning-player)))
 

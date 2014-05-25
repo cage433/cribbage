@@ -1,5 +1,7 @@
 (in-package :cage433-cribbage)
 
+(defparameter *print-game* nil)
+
 (defstruct card
   rank rank-index rank-value suit)
 
@@ -54,34 +56,26 @@
     (spec "should contain 52 cards"
       (= 52 (length (remove-duplicates (shuffled-deck)))))))
 
-(defun group-by (fn xs) 
-  (let ((groups (make-hash-table :test #'eql)))
-    (mapc 
-      (lambda (x) 
-        (let* ((y (funcall fn x))
-               (grp (gethash y groups nil)))
-            (setf (gethash y groups) (cons y grp))))
-      xs)
-    groups))
-
-(defun hash-values (hash)
-  (let ((vs nil))
-    (maphash (lambda (k v) (declare (ignore k)) (setf vs (cons v vs))) hash)
-    vs))
-
-(defun flush-value (cards hand-or-crib)
-  (let* ((suit-counts (mapcar #'length (hash-values (group-by #'card-suit cards))))
-         (longest-suit (if suit-counts (apply #'max suit-counts) 0))
-         (minimal-flush-size (ecase hand-or-crib
+(defun find-flush (cards hand-or-crib)
+  (let ((longest-suit
+          (car 
+            (sort (hash-values (group-by #'card-suit cards))
+                  #'>
+                  :key #'length )))
+        (minimal-flush-size (ecase hand-or-crib
                                 (:hand 4)
                                 (:crib 5))))
-      (if (>= longest-suit minimal-flush-size)
-        longest-suit
-        0)))
+    (and (>= (length longest-suit) minimal-flush-size)
+         (sort longest-suit #'< :key #'card-rank-index))))
+
+
+(defun flush-value (cards hand-or-crib)
+  (length (find-flush cards hand-or-crib)))
 
 (defun test-flush-value()
   (info "When valuing flushes"
     (spec "Valid flushes should count"
+      (equalp (hand-from-string "2H 4H 6H QH") (find-flush (hand-from-string "2H 4H 2D 6H QH") :hand))
       (= 4 (flush-value (hand-from-string "2H 4H 6H QH") :hand))
       (= 5 (flush-value (hand-from-string "2H 4H 6H QH AH 2C") :hand))
       (= 5 (flush-value (hand-from-string "2H 4H 6H QH AH 2C") :crib)))
@@ -115,15 +109,17 @@
     (spec "Hand with four of a kind is worth 12"
       (= 12 (pairs-and-higher-value (hand-from-string "2D 2C 2S 2H 10H QH"))))))
 
-(defun run-value (cards)
+(defun find-runs (cards)
   (let* ((by-indices (group-by #'card-rank-index cards))
          (contiguous-groups (remove-if-not #_(>= (length _) 3)
                                        (cl-utilities:split-sequence-if #_(null (gethash _ by-indices)) *RANK-INDEXES* :remove-empty-subseqs t)))
-         (value 0))
-    (mapc (lambda (group) 
-            (incf value (apply #'* (length group) (mapcar (lambda (i) (length (gethash i by-indices))) group))))
-          contiguous-groups)
-    value))
+         (run-groups (mapcar (lambda (group) 
+                               (mapcar (lambda (i) (gethash i by-indices)) group))
+                             contiguous-groups)))
+    (mappend (lambda (run-group) (apply #'cross-product run-group)) run-groups)))
+
+(defun run-value (cards)
+  (apply #'+ (mapcar #'length (find-runs cards))))
 
 (defun test-run-value()
   (info "When valuing runs"

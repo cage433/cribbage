@@ -1,0 +1,25 @@
+(in-package :cage433-lisp-utils)
+
+(defun test-cross-product()
+  (info "A cross product"
+    (spec "Should work on non-empty sets"
+      (=== nil (cross-product))
+      (=== '((x)) (cross-product '(x)) :test #'equalp)
+      (=== '((x) (y)) (cross-product '(x y)) :test #'equalp)
+      (=== '( (1 x) )
+           (cross-product '(1) '(x))
+           :test #'equalp)
+      (=== '( (a b c))
+           (cross-product '(a) '(b) '(c))
+           :test #'equalp)
+      (=== '( (1 b) (2 b))
+           (cross-product '(1 2) '(b) )
+           :test #'equalp)
+      (=== '( (1 b c) (2 b c) )
+           (cross-product '(1 2) '(b) '(c) )
+           :test #'equalp)
+      (=== '( (1 b) (2 b) (1 c) (2 c))
+           (cross-product '(1 2) '(b c) )
+           :test #'equalp)
+      )))
+     

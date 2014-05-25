@@ -76,3 +76,42 @@
     (defmacro ,(concat-syms 'with-named- name) (thing-name &body body)
       `(with-slots ,(mapcar (lambda (s) (list (concat-syms thing-name '/ s) s)) ',its-slots) ,thing-name
         ,@body))))
+
+(defun group-by (fn xs) 
+  (let ((groups (make-hash-table :test #'eql)))
+    (mapc 
+      (lambda (x) 
+        (let* ((y (funcall fn x))
+               (grp (gethash y groups nil)))
+            (setf (gethash y groups) (cons x grp))))
+      xs)
+    groups))
+
+(defun hash-to-list(hash)
+  (let ((kvs nil))
+    (maphash (lambda (k v) (setf kvs (cons (list k v) kvs))) hash)
+    kvs))
+
+(defun hash-values (hash)
+  (mapcar #'cadr (hash-to-list hash)))
+
+(defun mappend (fn &rest lsts)
+    "maps elements in list and finally appends all resulted lists."
+      (apply #'append (apply #'mapcar fn lsts)))
+
+(defun cross-product (&rest sets)
+  "Takes a collection of sets and returns 
+  the cross product of these. e.g. given
+    '( (1 2 3) '(X Y) )
+  returns
+    '( (1 X) (1 Y) 
+       (2 X) (2 Y) 
+       (3 X) (3 y) )
+    "
+  (cond ((null sets) sets)
+        ((= 1 (length sets)) (mapcar #'list (car sets)))
+        (t (mappend 
+             (lambda (y)
+                  (mapcar (lambda (x) (cons x y))
+                          (car sets)))
+             (apply #'cross-product (cdr sets))))))

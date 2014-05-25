@@ -103,10 +103,6 @@
       (:dealer dealer)
       (:pone pone))))
 
-(defun pad-left (text len)
-  (if (< (length text) len)
-    (concatenate 'string (make-string (- len (length text)) :initial-element #\Space) text)
-    text))
 
 (defun map-tree (fn tree)
   (cond ((null tree) nil)
@@ -129,6 +125,10 @@
                     (mapcar #'pad-left text-row widths)))
           list-of-text-rows)))
 
+(defun pad-left (text len)
+  (if (< (length text) len)
+    (concatenate 'string (make-string (- len (length text)) :initial-element #\Space) text)
+    text))
 (defun cards-to-string (cards)
   (format nil "~{~A~^ ~}" 
     (mapcar {#_(pad-left _ 3) #'card-to-short-string} cards)))

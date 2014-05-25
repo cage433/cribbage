@@ -35,6 +35,7 @@
   (load-and-compile-if-necessary "utils0")
   (load-and-compile-if-necessary "unit-testing")
   (load-and-compile-if-necessary "utils")
+  (load-and-compile-if-necessary "utils-tests")
   (load-and-compile-if-necessary "readers")
   (load-and-compile-if-necessary "readers-tests")
   (load-and-compile-if-necessary "anaphors")
@@ -48,6 +49,7 @@
     (test-curry)
     (test-compose)
     (test-def-rstruct)
+    (test-cross-product)
 ;    (test===)
     ))
 

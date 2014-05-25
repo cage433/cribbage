@@ -1,9 +1,5 @@
 (in-package :cage433-cribbage)
 
-(defun mappend (fn &rest lsts)
-  "maps elements in list and finally appends all resulted lists."
-  (apply #'append (apply #'mapcar fn lsts)))
-
 (defmacro while (expr &body body)
   (with-gensyms (x)
         `(do ((,x ,expr ,expr))

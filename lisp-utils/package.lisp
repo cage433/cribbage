@@ -19,4 +19,9 @@
            :aif
            :awhen
            :it
+           :group-by
+           :hash-to-list
+           :hash-values
+           :cross-product
+           :mappend
            ))
