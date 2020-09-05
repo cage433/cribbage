@@ -16,7 +16,6 @@
   (and
     (load-and-compile-if-necessary "utils")
     (load-and-compile-if-necessary "cards")
-    (load-and-compile-if-necessary "crib")
     (load-and-compile-if-necessary "play/game-state")
     (load-and-compile-if-necessary "play/discard")
     (load-and-compile-if-necessary "play/play")
