@@ -112,7 +112,7 @@
 (defun find-runs (cards)
   (let* ((by-indices (group-by #'card-rank-index cards))
          (contiguous-groups (remove-if-not #_(>= (length _) 3)
-                                       (cl-utilities:split-sequence-if #_(null (gethash _ by-indices)) *RANK-INDEXES* :remove-empty-subseqs t)))
+                                       (split-sequence-if #_(null (gethash _ by-indices)) *RANK-INDEXES* :remove-empty-subseqs t)))
          (run-groups (mapcar (lambda (group) 
                                (mapcar (lambda (i) (gethash i by-indices)) group))
                              contiguous-groups)))
@@ -318,7 +318,7 @@
 
 (defun hand-from-string (hand-as-string)
   (mapcar #'card-from-name
-          (cl-utilities:split-sequence #\Space hand-as-string :remove-empty-subseqs t)))
+          (split-sequence #\Space hand-as-string :remove-empty-subseqs t)))
     
 (defun test-cards()
   (and 
