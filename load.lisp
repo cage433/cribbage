@@ -1,22 +1,23 @@
 (in-package :common-lisp-user)
 (require :split-sequence)
 (require :cl-match)
+(require :cage433-ci)
 
 (let ((*default-pathname-defaults* (merge-pathnames #p"lisp-utils/" *default-pathname-defaults*)))
   (load "load"))
 
-(cage433-lisp-utils:load-and-compile-if-necessary "package")
+(cage433-ci:load-and-compile-if-necessary "package")
 
 (in-package :cage433-cribbage)
 
 (defun load-and-compile-source()
   (format t "Loading source ~%")
   (and
-    (load-and-compile-if-necessary "utils")
-    (load-and-compile-if-necessary "cards")
-    (load-and-compile-if-necessary "play/game-state")
-    (load-and-compile-if-necessary "play/discard")
-    (load-and-compile-if-necessary "play/play")
+    (cage433-ci:load-and-compile-if-necessary "utils")
+    (cage433-ci:load-and-compile-if-necessary "cards")
+    (cage433-ci:load-and-compile-if-necessary "play/game-state")
+    (cage433-ci:load-and-compile-if-necessary "play/discard")
+    (cage433-ci:load-and-compile-if-necessary "play/play")
     ))
 
 (defun compile-and-run-tests()
