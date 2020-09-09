@@ -3,7 +3,6 @@
 (in-package :cage433-lisp-utils)
 (require :cage433-ci)
 
-
 (proclaim '(optimize (debug 3)))
 
 (and

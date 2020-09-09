@@ -1,7 +1,6 @@
 (in-package :common-lisp-user)
 (require :split-sequence)
 (require :cl-match)
-(require :cage433-ci)
 
 (let ((*default-pathname-defaults* (merge-pathnames #p"lisp-utils/" *default-pathname-defaults*)))
   (load "load"))
@@ -32,24 +31,8 @@
       (test-play-rounds)
       )))
 
-(defun run-ci-function(ci-fun)
-  (declare #+sbcl(sb-ext:muffle-conditions style-warning))
-  (multiple-value-bind (success error-condition)
-    (ignore-errors
-      (funcall ci-fun)
-      )
-    (if success
-      (progn
-        (format t (colored-text "Tests passed~%" :green))
-        (sb-ext:exit :code 0))
-      (progn
-        (if error-condition
-          (format t (colored-text "~a~%" :red) error-condition)
-          (format t (colored-text "Tests failed ~%" :red)))
-        (sb-ext:exit :code 1)))))
-
     
 (in-package :common-lisp-user)
 (defun ci()
-  (cage433-cribbage::run-ci-function #'cage433-cribbage::compile-and-run-tests)
+  (cage433-ci:run-ci-function #'cage433-cribbage::compile-and-run-tests)
   )
