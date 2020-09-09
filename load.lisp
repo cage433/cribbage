@@ -1,9 +1,8 @@
 (in-package :common-lisp-user)
 (require :split-sequence)
 (require :cl-match)
-
-(let ((*default-pathname-defaults* (merge-pathnames #p"lisp-utils/" *default-pathname-defaults*)))
-  (load "load"))
+(require :cage433-ci)
+(require :cage433-lisp-utils)
 
 (cage433-ci:load-and-compile-if-necessary "package")
 
@@ -23,7 +22,6 @@
   (declare #+sbcl(sb-ext:muffle-conditions style-warning))
   (if (load-and-compile-source)
     (and
-      (cage433-lisp-utils::run-tests)
       (test-cards) 
       (test-game-state)
       (test-discard-cards)
